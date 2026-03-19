@@ -13,7 +13,7 @@ export default function BannerSection() {
     },
   };
 
-  // 🔥 Text animation (cinematic)
+  // 🔥 Text animation
   const textItem = {
     hidden: { opacity: 0, y: 80 },
     show: {
@@ -21,12 +21,12 @@ export default function BannerSection() {
       y: 0,
       transition: {
         duration: 0.9,
-        ease: [0.25, 0.1, 0.25, 1], // smooth luxury easing
+        ease: [0.25, 0.1, 0.25, 1],
       },
     },
   };
 
-  // 🔥 Image reveal animation
+  // 🔥 Image animation
   const imageVariant = {
     hidden: { scale: 1.2, opacity: 0 },
     show: {
@@ -45,9 +45,9 @@ export default function BannerSection() {
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           
-          {/* LEFT IMAGE */}
+          {/* IMAGE → FIRST IN MOBILE */}
           <motion.div
-            className="order-2 lg:order-1 overflow-hidden"
+            className="order-1 lg:order-1 overflow-hidden"
             variants={imageVariant}
             initial="hidden"
             whileInView="show"
@@ -62,9 +62,9 @@ export default function BannerSection() {
             />
           </motion.div>
 
-          {/* RIGHT CONTENT */}
+          {/* CONTENT → BELOW IMAGE IN MOBILE */}
           <motion.div
-            className="space-y-6 text-center lg:text-left order-1 lg:order-2"
+            className="space-y-6 text-center lg:text-left order-2 lg:order-2 mt-6 lg:mt-0"
             variants={container}
             initial="hidden"
             whileInView="show"
@@ -74,7 +74,7 @@ export default function BannerSection() {
             {/* TITLE */}
             <motion.h1
               variants={textItem}
-              className="text-3xl md:text-4xl font-semibold"
+              className="text-3xl md:text-4xl font-semibold "
             >
               Where Tradition
               <br />

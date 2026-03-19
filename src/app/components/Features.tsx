@@ -79,7 +79,7 @@ export default function Features() {
 
               {/* TEXT */}
               <div>
-                <h3 className="text-sm md:text-base font-medium text-[#5E2A14]">
+                <h3 className="text-sm md:text-base font-medium text-[#5E2A14] font-[Inter]">
                   {feature.title}
                 </h3>
 

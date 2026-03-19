@@ -2,7 +2,7 @@ import { Instagram } from 'lucide-react';
 
 export default function InstagramSection() {
   return (
-    <section className="py-6 md:py-20 bg-[#FAF8F5]">
+    <section className="py-6 md:py-20 ">
       <div className="">
         <div className="relative overflow-hidden  shadow-xl h-[300px] md:h-[400px]">
           <img
@@ -15,7 +15,7 @@ export default function InstagramSection() {
             <h2 className="text-white text-2xl sm:text-3xl md:text-4xl mb-3">
               Follow us on Instagram
             </h2>
-            <p className="text-white/90 text-lg md:text-xl mb-6">
+            <p className="text-white/90 text-lg md:text-xl mb-6 ">
               @kargee.co.in
             </p>
             <button className="bg-white text-[#5E2A14] px-8 py-3 rounded-full hover:bg-[#F5F1ED] transition-all duration-300 shadow-lg">
