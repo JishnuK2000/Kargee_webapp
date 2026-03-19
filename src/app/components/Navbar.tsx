@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import OTPLogin from "./OTPLogin";
 
@@ -14,7 +14,7 @@ import closeIcon from "../../assets/icons/close.png";
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-
+  const navigate = useNavigate();
   // 🔥 Hover state
   const [activeIndex, setActiveIndex] = useState(null);
   const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0 });
@@ -51,9 +51,7 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-100">
       <div className="max-w-screen-2xl mx-auto px-2 sm:px-4 lg:px-6">
-        
         <div className="flex items-center justify-between h-20 md:h-24">
-
           {/* LOGO */}
           <Link to="/" className="flex items-center">
             <img src={logo} alt="Kargee Logo" className="h-10 md:h-14" />
@@ -61,7 +59,6 @@ export default function Navbar() {
 
           {/* NAV LINKS */}
           <div className="hidden md:flex items-center space-x-12 relative">
-            
             {navLinks.map((link, index) => (
               <div
                 key={link.name}
@@ -72,6 +69,7 @@ export default function Navbar() {
               >
                 {/* TEXT */}
                 <motion.span
+                  onClick={() => navigate("/products")}
                   whileHover={{ y: -2 }}
                   className="text-base md:text-lg text-gray-700 hover:text-[#5E2A14] cursor-pointer font-medium"
                 >
@@ -103,7 +101,6 @@ export default function Navbar() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-
               </div>
             ))}
 
@@ -121,7 +118,6 @@ export default function Navbar() {
 
           {/* ICONS */}
           <div className="flex items-center space-x-5 md:space-x-7">
-            
             <button>
               <img src={searchIcon} className="w-6 h-6 md:w-7 md:h-7" />
             </button>
@@ -147,7 +143,6 @@ export default function Navbar() {
                 className="w-7 h-7"
               />
             </button>
-
           </div>
         </div>
       </div>

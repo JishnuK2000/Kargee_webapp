@@ -1,8 +1,8 @@
 import hero2 from "../../assets/images/shimmer.png";
 import { motion } from "framer-motion";
-
+import { useNavigate } from "react-router-dom";
 export default function BannerSection() {
-
+  const navigate = useNavigate();
   // 🔥 Container stagger
   const container = {
     hidden: {},
@@ -42,9 +42,7 @@ export default function BannerSection() {
   return (
     <section className="py-6 md:py-20 overflow-hidden">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          
           {/* IMAGE → FIRST IN MOBILE */}
           <motion.div
             className="order-1 lg:order-1 overflow-hidden"
@@ -64,13 +62,13 @@ export default function BannerSection() {
 
           {/* CONTENT → BELOW IMAGE IN MOBILE */}
           <motion.div
+          
             className="space-y-6 text-center lg:text-left order-2 lg:order-2 mt-6 lg:mt-0"
             variants={container}
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
           >
-
             {/* TITLE */}
             <motion.h1
               variants={textItem}
@@ -86,14 +84,16 @@ export default function BannerSection() {
               variants={textItem}
               className="text-gray-600 text-base md:text-lg leading-relaxed mx-auto lg:mx-0"
             >
-              Experience the perfect harmony of timeless craftsmanship and contemporary design. 
-              Each piece is thoughtfully curated to bring you closer to your cultural roots while 
-              embracing modern aesthetics.
+              Experience the perfect harmony of timeless craftsmanship and
+              contemporary design. Each piece is thoughtfully curated to bring
+              you closer to your cultural roots while embracing modern
+              aesthetics.
             </motion.p>
 
             {/* BUTTON */}
             <motion.div variants={textItem}>
               <motion.button
+                onClick={() => navigate("/products")}
                 className="bg-[#5E2A14] text-white px-8 py-3 hover:bg-[#4A2110] shadow-lg"
                 whileHover={{ scale: 1.08, y: -2 }}
                 whileTap={{ scale: 0.95 }}
@@ -102,9 +102,7 @@ export default function BannerSection() {
                 Explore More
               </motion.button>
             </motion.div>
-
           </motion.div>
-
         </div>
       </div>
     </section>

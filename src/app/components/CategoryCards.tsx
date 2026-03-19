@@ -1,8 +1,10 @@
+import { useNavigate } from "react-router-dom";
 import pic4 from "../../assets/images/pic4.jpg";
 import pic5 from "../../assets/images/pic5.jpg";
 import { motion } from "framer-motion";
 
 export default function CategoryCards() {
+  const navigate=useNavigate()
   const categories = [
     {
       title: "The Art of Summer Dressing",
@@ -70,7 +72,7 @@ export default function CategoryCards() {
                   </h3>
 
                   <motion.button
-                    whileHover={{ scale: 1.08, y: -2 }}
+                    whileHover={{ scale: 1.08, y: -2 }}  onClick={() => navigate("/products")}
                     whileTap={{ scale: 0.95 }}
                     transition={{ duration: 0.3 }}
                     className="bg-[#5E2A14] text-white px-5 py-2 text-sm hover:bg-[#7a3a1f]"
