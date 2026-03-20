@@ -14,7 +14,8 @@ export const productsData = [
     category: "Co-ord Sets",
     price: 2499,
     discountPrice: 1999,
-    description: "Elegant ivory co-ord set for effortless summer styling.",
+    description:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
     fabric: "Cotton Blend",
     sizes: ["S", "M", "L", "XL"],
     colors: ["Ivory"],
@@ -32,7 +33,8 @@ export const productsData = [
     category: "Kurtas",
     price: 2999,
     discountPrice: 2599,
-    description: "Classic black kurta with subtle festive detailing.",
+    description:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
     fabric: "Silk Blend",
     sizes: ["M", "L", "XL"],
     colors: ["Black"],
@@ -50,7 +52,8 @@ export const productsData = [
     category: "Saree",
     price: 3499,
     discountPrice: 2999,
-    description: "Soft blush saree with minimal elegance.",
+    description:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
     fabric: "Georgette",
     sizes: ["Free Size"],
     colors: ["Pink"],
@@ -68,7 +71,8 @@ export const productsData = [
     category: "Kurtas",
     price: 1999,
     discountPrice: 1599,
-    description: "Breathable linen kurta perfect for everyday wear.",
+    description:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
     fabric: "Linen",
     sizes: ["S", "M", "L"],
     colors: ["Beige"],
@@ -86,7 +90,8 @@ export const productsData = [
     category: "Dupattas",
     price: 999,
     discountPrice: 799,
-    description: "Lightweight floral dupatta for festive layering.",
+    description:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
     fabric: "Chiffon",
     sizes: ["Free Size"],
     colors: ["Multi"],
@@ -104,7 +109,8 @@ export const productsData = [
     category: "Co-ord Sets",
     price: 2699,
     discountPrice: 2199,
-    description: "Modern olive co-ord set with a relaxed silhouette.",
+    description:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
     fabric: "Rayon",
     sizes: ["S", "M", "L"],
     colors: ["Olive"],
@@ -122,7 +128,8 @@ export const productsData = [
     category: "Kurtas",
     price: 2799,
     discountPrice: 2299,
-    description: "Bright yellow kurta designed for festive occasions.",
+    description:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
     fabric: "Cotton Silk",
     sizes: ["M", "L", "XL"],
     colors: ["Yellow"],
