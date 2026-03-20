@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Star } from "lucide-react";
 import Layout from "../../components/layout";
 import { productsData } from "../../../data/products";
@@ -16,6 +16,9 @@ export default function ProductDetail() {
         <p className="p-6">Product not found</p>
       </Layout>
     );
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <Layout>
