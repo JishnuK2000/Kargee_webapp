@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import pic1 from "../../assets/images/pic1.jpg";
 import pic2 from "../../assets/images/pic2.jpg";
-import pic3 from "../../assets/images/pic3.jpg";
+import pic3 from "../../assets/images/p2.jpg";
 import { motion } from "framer-motion";
 
 export default function CollectionGrid() {

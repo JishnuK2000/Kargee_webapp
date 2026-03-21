@@ -10,8 +10,10 @@ import cartIcon from "../../assets/icons/cart.png";
 import userIcon from "../../assets/icons/user.png";
 import menuIcon from "../../assets/icons/menu.png";
 import closeIcon from "../../assets/icons/close.png";
-
+import { useCart } from "../../context/cartContext";
 export default function Navbar() {
+  const { cart } = useCart();
+  const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const navigate = useNavigate();
@@ -122,13 +124,15 @@ export default function Navbar() {
               <img src={searchIcon} className="w-6 h-6 md:w-7 md:h-7" />
             </button>
 
-            <button className="relative">
+            <button onClick={() => navigate("/cart")} className="relative">
               <img src={cartIcon} className="w-6 h-6 md:w-7 md:h-7" />
-              <span className="absolute -top-2 -right-2 bg-[#5E2A14] text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">
-                0
-              </span>
-            </button>
 
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-[#5E2A14] text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </button>
             <button onClick={() => setIsLoginOpen(true)}>
               <img src={userIcon} className="w-6 h-6 md:w-7 md:h-7" />
             </button>
