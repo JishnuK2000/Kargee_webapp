@@ -99,7 +99,7 @@ export default function Cart() {
 
             {/* RIGHT - SUMMARY */}
             <div className="border p-6 h-fit space-y-4">
-              <h2 className="text-lg font-medium">Order Summary</h2>
+              <h2 className="text-lg font-medium font-[Inter]">Order Summary</h2>
 
               <div className="flex justify-between text-sm">
                 <span>Subtotal</span>

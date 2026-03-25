@@ -11,8 +11,19 @@ import userIcon from "../../assets/icons/user.png";
 import menuIcon from "../../assets/icons/menu.png";
 import closeIcon from "../../assets/icons/close.png";
 import { useCart } from "../../context/cartContext";
+import LoginModal from "../components/LoginModal"; // adjust path if needed
+interface User {
+  _id: string;
+  name: string;
+  mobile: string;
+}
+
+
 export default function Navbar() {
   const { cart } = useCart();
+  const [user, setUser] = useState<User | null>(
+  JSON.parse(localStorage.getItem("user") || "null"),
+);
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -49,7 +60,9 @@ export default function Navbar() {
     }
     setActiveIndex(index);
   };
-
+  const handleLoginSuccess = (loggedInUser: User) => {
+    setUser(loggedInUser);
+  };
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-100">
       <div className="max-w-screen-2xl mx-auto px-2 sm:px-4 lg:px-6">
@@ -133,14 +146,28 @@ export default function Navbar() {
                 </span>
               )}
             </button>
-            <button onClick={() => setIsLoginOpen(true)}>
+            <button
+              onClick={() => {
+                if (user) {
+                  navigate("/profile");
+                } else {
+                  setIsLoginOpen(true);
+                }
+              }}
+            >
               <img src={userIcon} className="w-6 h-6 md:w-7 md:h-7" />
             </button>
 
             {/* MOBILE MENU */}
             <button
               className="md:hidden"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={() => {
+                if (user) {
+                  navigate("/profile");
+                } else {
+                  setIsLoginOpen(true);
+                }
+              }}
             >
               <img
                 src={isMobileMenuOpen ? closeIcon : menuIcon}
@@ -175,7 +202,12 @@ export default function Navbar() {
       )}
 
       {/* OTP LOGIN */}
-      {isLoginOpen && <OTPLogin onClose={() => setIsLoginOpen(false)} />}
+      {isLoginOpen && (
+        <LoginModal
+          onClose={() => setIsLoginOpen(false)}
+          onLoginSuccess={handleLoginSuccess}
+        />
+      )}
     </nav>
   );
 }

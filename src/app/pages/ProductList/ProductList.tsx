@@ -9,8 +9,58 @@ import { productsData } from "../../../data/products"; // your new data import
 
 export default function ProductList() {
   const [showFilter, setShowFilter] = useState(false);
+  const API = import.meta.env.VITE_API_URL;
+  const [categories, setCategories] = useState<string[]>([]);
+  const [collections, setCollections] = useState<string[]>([]);
+  const [products, setProducts] = useState<any[]>([]); // ✅ NEW
   const [showSort, setShowSort] = useState(false); // mobile sort drawer
+
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`${API}/products`);
+        const data = await res.json();
+
+        console.log("PRODUCTS:", data);
+        setProducts(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+
+    const fetchFilters = async () => {
+      try {
+        const catRes = await fetch(
+          `${import.meta.env.VITE_API_URL}/categories`,
+        );
+        const catData = await catRes.json();
+
+        const colRes = await fetch(
+          `${import.meta.env.VITE_API_URL}/collections`,
+        );
+        const colData = await colRes.json();
+
+        // ✅ Extract only names
+        setCategories(catData.map((c: any) => c.name));
+        setCollections(colData.map((c: any) => c.name));
+      } catch (err) {
+        console.error("Filter fetch error:", err);
+      }
+    };
+
+    fetchFilters();
+  }, []);
   const [filters, setFilters] = useState({
     category: [] as string[],
     collection: [] as string[],
@@ -53,33 +103,41 @@ export default function ProductList() {
 
   // Filtered and Sorted products
   const filteredProducts = useMemo(() => {
-    return productsData
+    return products
       .filter((p) => {
         const matchCategory =
           filters.category.length === 0 ||
           filters.category.includes(p.category);
+
         const matchCollection =
           filters.collection.length === 0 ||
-          filters.collection.includes(p.collection);
+          filters.collection.includes(p.collectionName); // ⚠️ FIX
+
         const matchSize =
           filters.size.length === 0 ||
-          p.sizes.some((s) => filters.size.includes(s));
+          (p.sizes || []).some((s: string) => filters.size.includes(s));
+
         const matchPrice =
-          p.discountPrice >= filters.price[0] &&
-          p.discountPrice <= filters.price[1];
+          (p.discountPrice || p.price) >= filters.price[0] &&
+          (p.discountPrice || p.price) <= filters.price[1];
 
         return matchCategory && matchCollection && matchSize && matchPrice;
       })
       .sort((a, b) => {
-        if (sort === "price-asc") return a.discountPrice - b.discountPrice;
-        if (sort === "price-desc") return b.discountPrice - a.discountPrice;
+        if (sort === "price-asc")
+          return (a.discountPrice || a.price) - (b.discountPrice || b.price);
+
+        if (sort === "price-desc")
+          return (b.discountPrice || b.price) - (a.discountPrice || a.price);
+
         if (sort === "newest")
           return (
-            new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime()
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
+
         return 0;
       });
-  }, [filters, sort]);
+  }, [products, filters, sort]);
 
   const activeFilters = [
     ...filters.category,
@@ -143,8 +201,10 @@ export default function ProductList() {
             <div className="hidden md:block space-y-8 text-base">
               {/* CATEGORY */}
               <div>
-                <h3 className="font-medium mb-4 text-lg">Category</h3>
-                {["Saree", "Co-ord Sets", "Kurtas", "Dupattas"].map((c) => (
+                <h3 className="font-medium mb-4 text-lg font-[Inter]">
+                  Category
+                </h3>
+                {categories?.slice(0, 5)?.map((c) => (
                   <label key={c} className="block mb-2 flex items-center gap-2">
                     <input
                       type="checkbox"
@@ -159,8 +219,10 @@ export default function ProductList() {
 
               {/* COLLECTION */}
               <div>
-                <h3 className="font-medium mb-4 text-lg">Collection</h3>
-                {["Summer", "Festive", "New Arrivals"].map((c) => (
+                <h3 className="font-medium mb-4 text-lg font-[Inter]">
+                  Collection
+                </h3>
+                {collections?.slice(0, 5)?.map((c) => (
                   <label key={c} className="block mb-2 flex items-center gap-2">
                     <input
                       type="checkbox"
@@ -175,7 +237,7 @@ export default function ProductList() {
 
               {/* PRICE */}
               <div>
-                <h3 className="font-medium mb-4 text-lg">Price</h3>
+                <h3 className="font-medium mb-4 text-lg font-[Inter]">Price</h3>
                 <p className="mb-3 text-sm">
                   ₹{filters.price[0]} — ₹{filters.price[1]}
                 </p>
@@ -202,8 +264,8 @@ export default function ProductList() {
 
               {/* SIZE */}
               <div>
-                <h3 className="font-medium mb-4 text-lg">Size</h3>
-                {["S", "M", "L", "XL", "Free Size"].map((s) => (
+                <h3 className="font-medium mb-4 text-lg font-[Inter]">Size</h3>
+                {["XS", "S", "M", "L", "XL", "Free Size"].map((s) => (
                   <label key={s} className="block mb-2 flex items-center gap-2">
                     <input
                       type="checkbox"
@@ -235,7 +297,7 @@ export default function ProductList() {
                     show: { opacity: 1, y: 0 },
                   }}
                   className="group"
-                  onClick={() => navigate(`/products/${p.id}`)}
+                  onClick={() => navigate(`/products/${p._id}`)}
                 >
                   {/* IMAGE WRAPPER */}
                   <div className="relative overflow-hidden w-full">
@@ -329,7 +391,7 @@ export default function ProductList() {
                 {/* CATEGORY */}
                 <div className="mb-6">
                   <h4 className="mb-2 text-sm font-medium">Category</h4>
-                  {["Saree", "Co-ord Sets", "Kurtas", "Dupattas"].map((c) => (
+                  {categories?.slice(0, 5)?.map((c) => (
                     <label key={c} className="flex gap-2 mb-2 text-sm">
                       <input
                         type="checkbox"
@@ -345,7 +407,7 @@ export default function ProductList() {
                 {/* COLLECTION */}
                 <div className="mb-6">
                   <h4 className="mb-2 text-sm font-medium">Collection</h4>
-                  {["Summer", "Festive", "New Arrivals"].map((c) => (
+                  {collections?.slice(0, 5)?.map((c) => (
                     <label key={c} className="flex gap-2 mb-2 text-sm">
                       <input
                         type="checkbox"

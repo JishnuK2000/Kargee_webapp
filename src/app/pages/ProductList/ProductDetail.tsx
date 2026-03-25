@@ -2,24 +2,53 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
 import Layout from "../../components/layout";
-import { productsData } from "../../../data/products";
 import cartIcon from "../../../assets/icons/cart.svg";
 import favIcon from "../../../assets/icons/wishlist.svg";
 import { useCart } from "../../../context/cartContext";
 import { useToast } from "../../../context/toastContext";
+
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { showToast } = useToast();
 
-  const product = productsData.find((p) => p.id === id);
+  const API = import.meta.env.VITE_API_URL;
 
-  const [selectedImage, setSelectedImage] = useState(product?.images[0] || "");
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const [selectedImage, setSelectedImage] = useState("");
   const [qty, setQty] = useState(1);
 
+  // ✅ Fetch product from DB
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+
+    const fetchProduct = async () => {
+      try {
+        const res = await fetch(`${API}/products/${id}`);
+        const data = await res.json();
+
+        setProduct(data);
+        setSelectedImage(data.images?.[0] || "");
+      } catch (err) {
+        console.error("Error fetching product:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchProduct();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <Layout>
+        <p className="p-6">Loading...</p>
+      </Layout>
+    );
+  }
 
   if (!product) {
     return (
@@ -29,29 +58,39 @@ export default function ProductDetail() {
     );
   }
 
-  const { showToast } = useToast();
-
+  // ✅ Add to cart
   const handleAddToCart = () => {
     addToCart({
-      id: product.id,
+      id: product._id, // ⚠️ MongoDB uses _id
       name: product.name,
       price: product.discountPrice,
-      image: product.images[0],
+      image: product.images?.[0],
       quantity: qty,
     });
 
     showToast("Product added to cart successfully");
   };
 
-  // 👉 Buy now handler
+  // 👉 Buy now
   const handleBuyNow = () => {
-   
+    navigate("/checkout", {
+      state: {
+        product: {
+          id: product._id,
+          name: product.name,
+          price: product.discountPrice,
+          image: product.images?.[0],
+          quantity: qty,
+        },
+      },
+    });
   };
 
   return (
     <Layout>
       <section className="min-h-screen pb-24 md:pb-0 font-[Inter]">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6 md:py-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+
           {/* IMAGE SECTION */}
           <div className="space-y-4">
             <div className="relative w-full overflow-hidden">
@@ -63,7 +102,7 @@ export default function ProductDetail() {
 
             {/* Thumbnails */}
             <div className="flex gap-3">
-              {product.images.map((img, i) => (
+              {product.images?.map((img: string, i: number) => (
                 <img
                   key={i}
                   src={img}
@@ -80,6 +119,7 @@ export default function ProductDetail() {
 
           {/* PRODUCT DETAILS */}
           <div className="space-y-5">
+
             {/* CATEGORY + RATING */}
             <div className="flex items-center justify-between text-sm text-gray-500">
               <span>{product.category}</span>
@@ -95,13 +135,15 @@ export default function ProductDetail() {
             </h1>
 
             {/* DESCRIPTION */}
-            <p className="text-sm text-gray-600">{product.description}</p>
+            <p className="text-sm text-gray-600">
+              {product.description}
+            </p>
 
             {/* COLORS */}
             <div>
               <h4 className="text-sm font-medium mb-2">Colors</h4>
               <div className="flex gap-2">
-                {product.colors.map((color) => (
+                {product.colors?.map((color: string) => (
                   <span
                     key={color}
                     className="w-6 h-6 rounded-full border cursor-pointer"
@@ -115,7 +157,7 @@ export default function ProductDetail() {
             <div>
               <h4 className="text-sm font-medium mb-2">Sizes</h4>
               <div className="flex gap-2 flex-wrap">
-                {product.sizes.map((size) => (
+                {product.sizes?.map((size: string) => (
                   <span
                     key={size}
                     className="border px-3 py-1 text-sm cursor-pointer hover:border-[#5E2A14]"
@@ -142,6 +184,7 @@ export default function ProductDetail() {
 
             {/* ACTIONS */}
             <div className="flex items-center gap-3 flex-wrap">
+
               {/* Quantity */}
               <div className="flex items-center border">
                 <button
@@ -180,6 +223,7 @@ export default function ProductDetail() {
                 <img src={favIcon} alt="wishlist" className="w-5 h-5" />
               </button>
             </div>
+
           </div>
         </div>
       </section>
