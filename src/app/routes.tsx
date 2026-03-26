@@ -24,6 +24,10 @@ export const router = createBrowserRouter([
     element: <Cart />,
   },
   {
+    path: "cart/checkout", // dynamic route
+    element: <ProtectedRoute><Checkout /></ProtectedRoute>,
+  },
+  {
     path: "/checkout", // dynamic route
     element: <ProtectedRoute><Checkout /></ProtectedRoute>,
   },

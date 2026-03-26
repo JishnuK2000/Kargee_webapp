@@ -20,8 +20,9 @@ export default function ProductDetail() {
 
   const [selectedImage, setSelectedImage] = useState("");
   const [qty, setQty] = useState(1);
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
 
-  // ✅ Fetch product from DB
   useEffect(() => {
     window.scrollTo(0, 0);
 
@@ -29,9 +30,11 @@ export default function ProductDetail() {
       try {
         const res = await fetch(`${API}/products/${id}`);
         const data = await res.json();
-
         setProduct(data);
         setSelectedImage(data.images?.[0] || "");
+        // auto-select first size and color
+        setSelectedSize(data.sizes?.[0] || "");
+        setSelectedColor(data.colors?.[0] || "");
       } catch (err) {
         console.error("Error fetching product:", err);
       } finally {
@@ -58,21 +61,37 @@ export default function ProductDetail() {
     );
   }
 
-  // ✅ Add to cart
+  const validate = () => {
+    if (!selectedSize) {
+      showToast("Please select a size");
+      return false;
+    }
+    if (!selectedColor) {
+      showToast("Please select a color");
+      return false;
+    }
+    return true;
+  };
+
   const handleAddToCart = () => {
+    if (!validate()) return;
+
     addToCart({
-      id: product._id, // ⚠️ MongoDB uses _id
+      id: product._id,
       name: product.name,
       price: product.discountPrice,
       image: product.images?.[0],
       quantity: qty,
+      size: selectedSize,
+      color: selectedColor,
     });
 
     showToast("Product added to cart successfully");
   };
 
-  // 👉 Buy now
   const handleBuyNow = () => {
+    if (!validate()) return;
+
     navigate("/checkout", {
       state: {
         product: {
@@ -81,6 +100,8 @@ export default function ProductDetail() {
           price: product.discountPrice,
           image: product.images?.[0],
           quantity: qty,
+          size: selectedSize,
+          color: selectedColor,
         },
       },
     });
@@ -135,18 +156,29 @@ export default function ProductDetail() {
             </h1>
 
             {/* DESCRIPTION */}
-            <p className="text-sm text-gray-600">
-              {product.description}
-            </p>
+            <p className="text-sm text-gray-600">{product.description}</p>
 
             {/* COLORS */}
             <div>
-              <h4 className="text-sm font-medium mb-2">Colors</h4>
+              <h4 className="text-sm font-medium mb-2">
+                Color{" "}
+                {selectedColor && (
+                  <span className="text-gray-400 font-normal capitalize">
+                    — {selectedColor}
+                  </span>
+                )}
+              </h4>
               <div className="flex gap-2">
                 {product.colors?.map((color: string) => (
-                  <span
+                  <button
                     key={color}
-                    className="w-6 h-6 rounded-full border cursor-pointer"
+                    onClick={() => setSelectedColor(color)}
+                    title={color}
+                    className={`w-7 h-7 rounded-full border-2 transition ${
+                      selectedColor === color
+                        ? "border-[#5E2A14] scale-110 shadow-md"
+                        : "border-gray-300"
+                    }`}
                     style={{ backgroundColor: color.toLowerCase() }}
                   />
                 ))}
@@ -155,18 +187,29 @@ export default function ProductDetail() {
 
             {/* SIZES */}
             <div>
-              <h4 className="text-sm font-medium mb-2">Sizes</h4>
+              <h4 className="text-sm font-medium mb-2">
+                Size{" "}
+                {selectedSize && (
+                  <span className="text-gray-400 font-normal">
+                    — {selectedSize}
+                  </span>
+                )}
+              </h4>
               <div className="flex gap-2 flex-wrap">
                 {product.sizes?.map((size: string) => (
-                  <span
+                  <button
                     key={size}
-                    className="border px-3 py-1 text-sm cursor-pointer hover:border-[#5E2A14]"
+                    onClick={() => setSelectedSize(size)}
+                    className={`border px-3 py-1 text-sm transition ${
+                      selectedSize === size
+                        ? "border-[#5E2A14] bg-[#5E2A14] text-white"
+                        : "border-gray-300 hover:border-[#5E2A14]"
+                    }`}
                   >
                     {size}
-                  </span>
+                  </button>
                 ))}
               </div>
-
               <button className="mt-2 text-sm underline text-[#5E2A14]">
                 View Size Guide
               </button>

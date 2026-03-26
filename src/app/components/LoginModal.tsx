@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
+import { mergeCartAPI } from "../../Services/cartService";
 
 interface LoginModalProps {
   onClose: () => void;
@@ -17,15 +18,20 @@ interface User {
 
 const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess }) => {
   const API = import.meta.env.VITE_API_URL;
+
   const [step, setStep] = useState<1 | 2>(1);
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  // 📲 Send OTP
   const handleSendOtp = async () => {
     if (!mobile) return setMessage("Enter your mobile number");
+
     setLoading(true);
+    setMessage("");
+
     try {
       await axios.post(`${API}/user/auth/send-otp`, { mobile });
       setStep(2);
@@ -37,15 +43,44 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess }) => {
     }
   };
 
+  // 🔐 Verify OTP + LOGIN + MERGE CART
   const handleVerifyOtp = async () => {
     if (!otp) return setMessage("Enter OTP");
+
     setLoading(true);
+    setMessage("");
+
     try {
-      const res = await axios.post(`${API}/user/auth/verify-otp`, { mobile, otp });
+      const res = await axios.post(`${API}/user/auth/verify-otp`, {
+        mobile,
+        otp,
+      });
+
       const { token, user } = res.data;
+
+      // ✅ Save auth
       localStorage.setItem("userToken", token);
       localStorage.setItem("user", JSON.stringify(user));
+
+      // 🔥 STEP 1: GET LOCAL CART
+      const localCart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+      // 🔥 STEP 2: MERGE TO BACKEND
+      if (localCart.length > 0) {
+        try {
+          await mergeCartAPI(localCart, token);
+          localStorage.removeItem("cart"); // clear local
+        } catch (mergeErr) {
+          console.error("Cart merge failed:", mergeErr);
+        }
+      }
+
+      // ✅ Notify app
       onLoginSuccess(user);
+
+      // 🔥 OPTIONAL: force reload so CartContext refetches backend cart
+      window.location.reload();
+
       onClose();
     } catch (err: any) {
       setMessage(err.response?.data?.message || "Invalid OTP");
@@ -62,7 +97,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess }) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        {/* Modal Box */}
         <motion.div
           initial={{ scale: 0.8, y: 50, opacity: 0 }}
           animate={{ scale: 1, y: 0, opacity: 1 }}
@@ -70,7 +104,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess }) => {
           transition={{ duration: 0.3 }}
           className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6 relative"
         >
-          {/* Close Button */}
+          {/* ❌ Close */}
           <button
             onClick={onClose}
             className="absolute top-3 right-3 text-gray-400 hover:text-black text-lg"
@@ -86,6 +120,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess }) => {
             <p className="text-sm text-red-500 mb-3 text-center">{message}</p>
           )}
 
+          {/* 📱 STEP 1 */}
           {step === 1 && (
             <motion.div
               key="mobile"
@@ -110,6 +145,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess }) => {
             </motion.div>
           )}
 
+          {/* 🔐 STEP 2 */}
           {step === 2 && (
             <motion.div
               key="otp"

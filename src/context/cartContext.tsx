@@ -1,56 +1,172 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import {
+  getCartAPI,
+  addToCartAPI,
+  updateCartAPI,
+  removeCartAPI,
+} from "../Services/cartService";
 
+// ✅ cartItemId = MongoDB subdocument _id (unique per cart row)
+// ✅ id         = productId (same product can appear multiple times with diff size/color)
 interface CartItem {
+  cartItemId: string;
   id: string;
   name: string;
   price: number;
   image: string;
   quantity: number;
+  size?: string;
+  color?: string;
 }
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (item: CartItem) => void;
-  removeFromCart: (id: string) => void;
-  updateQuantity: (id: string, qty: number) => void;
+  addToCart: (item: Omit<CartItem, "cartItemId">) => Promise<void>;
+  removeFromCart: (cartItemId: string) => Promise<void>;
+  updateQuantity: (cartItemId: string, qty: number) => Promise<void>;
+  loading: boolean;
 }
+
+// Guest-only: generate a unique key per cart entry
+const generateCartItemId = () =>
+  `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+// Normalize backend cart item → frontend CartItem
+const formatItem = (item: any): CartItem => ({
+  cartItemId: item._id,            // subdoc _id — unique per row
+  id: item.productId?.toString(),  // actual product reference
+  name: item.name,
+  price: item.price,
+  image: item.image,
+  quantity: item.quantity,
+  size: item.size || "",
+  color: item.color || "",
+});
 
 const CartContext = createContext<CartContextType | null>(null);
 
 export const CartProvider = ({ children }: any) => {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const addToCart = (item: CartItem) => {
-    setCart((prev) => {
-      const exist = prev.find((p) => p.id === item.id);
+  const [user] = useState<any>(
+    JSON.parse(localStorage.getItem("user") || "null")
+  );
+  const token = localStorage.getItem("userToken");
 
-      if (exist) {
-        return prev.map((p) =>
-          p.id === item.id
-            ? { ...p, quantity: p.quantity + item.quantity }
-            : p
-        );
+  // Load cart on mount
+  useEffect(() => {
+    const loadCart = async () => {
+      try {
+        if (user && token) {
+          const res = await getCartAPI(token);
+          setCart(res.data.map(formatItem));
+        } else {
+          const saved = localStorage.getItem("cart");
+          setCart(saved ? JSON.parse(saved) : []);
+        }
+      } catch (err) {
+        console.error("loadCart error:", err);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      return [...prev, item];
-    });
+    loadCart();
+  }, [user, token]);
+
+  // Persist guest cart to localStorage
+  useEffect(() => {
+    if (!user) {
+      localStorage.setItem("cart", JSON.stringify(cart));
+    }
+  }, [cart, user]);
+
+  // ➕ Add to cart
+  const addToCart = async (item: Omit<CartItem, "cartItemId">) => {
+    if (user && token) {
+      try {
+        // Backend handles merging (same productId + size + color → qty++)
+        // Always sync from response so cartItemId stays accurate
+        const res = await addToCartAPI(
+          {
+            productId: item.id,
+            name: item.name,
+            price: item.price,
+            image: item.image,
+            quantity: item.quantity,
+            size: item.size,
+            color: item.color,
+          },
+          token
+        );
+        setCart(res.data.map(formatItem));
+      } catch (err) {
+        console.error("addToCart error:", err);
+      }
+    } else {
+      // Guest: merge locally by productId + size + color
+      setCart((prev) => {
+        const existing = prev.find(
+          (p) =>
+            p.id === item.id &&
+            p.size === item.size &&
+            p.color === item.color
+        );
+
+        if (existing) {
+          return prev.map((p) =>
+            p.cartItemId === existing.cartItemId
+              ? { ...p, quantity: p.quantity + item.quantity }
+              : p
+          );
+        }
+
+        return [...prev, { ...item, cartItemId: generateCartItemId() }];
+      });
+    }
   };
 
-  const removeFromCart = (id: string) => {
-    setCart((prev) => prev.filter((p) => p.id !== id));
+  // ❌ Remove — cartItemId = MongoDB subdoc _id for logged-in, generated id for guest
+  const removeFromCart = async (cartItemId: string) => {
+    setCart((prev) => prev.filter((p) => p.cartItemId !== cartItemId));
+
+    if (user && token) {
+      try {
+        await removeCartAPI(cartItemId, token);
+      } catch (err) {
+        console.error("removeFromCart error:", err);
+        // Rollback on failure
+        const res = await getCartAPI(token);
+        setCart(res.data.map(formatItem));
+      }
+    }
   };
 
-  const updateQuantity = (id: string, qty: number) => {
+  // 🔄 Update quantity
+  const updateQuantity = async (cartItemId: string, qty: number) => {
+    const newQty = Math.max(1, qty);
+
     setCart((prev) =>
       prev.map((p) =>
-        p.id === id ? { ...p, quantity: Math.max(1, qty) } : p
+        p.cartItemId === cartItemId ? { ...p, quantity: newQty } : p
       )
     );
+
+    if (user && token) {
+      try {
+        await updateCartAPI(cartItemId, newQty, token);
+      } catch (err) {
+        console.error("updateQuantity error:", err);
+        const res = await getCartAPI(token);
+        setCart(res.data.map(formatItem));
+      }
+    }
   };
 
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, updateQuantity }}
+      value={{ cart, addToCart, removeFromCart, updateQuantity, loading }}
     >
       {children}
     </CartContext.Provider>
