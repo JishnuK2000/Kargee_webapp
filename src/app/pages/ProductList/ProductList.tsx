@@ -18,24 +18,7 @@ export default function ProductList() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(`${API}/products`);
-        const data = await res.json();
-
-        console.log("PRODUCTS:", data);
-        setProducts(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
+  // Removed static mount fetch, now dependency driven below.
   useEffect(() => {
     window.scrollTo(0, 0);
 
@@ -101,27 +84,58 @@ export default function ProductList() {
     });
   };
 
+  // Backend API handles Category, Collection, Price.
+  // We debounce the fetch to prevent spam on slider interaction.
+  useEffect(() => {
+    const fetchFilteredProducts = async () => {
+      try {
+        setLoading(true);
+        const params = new URLSearchParams();
+
+        if (filters.category.length > 0) {
+          filters.category.forEach((c) => params.append("category", c));
+        }
+        if (filters.collection.length > 0) {
+          filters.collection.forEach((c) => params.append("collectionName", c));
+        }
+
+        // Pass Price
+        if (filters.price[0] > 0) {
+          params.append("minPrice", filters.price[0].toString());
+        }
+        if (filters.price[1] < 5000) {
+          params.append("maxPrice", filters.price[1].toString());
+        }
+
+        const url = `${API}/products` + (params.toString() ? `?${params.toString()}` : "");
+        const res = await fetch(url);
+        const data = await res.json();
+        setProducts(data);
+      } catch (err) {
+        console.error("Filter fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      fetchFilteredProducts();
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [filters.category, filters.collection, filters.price, API]);
+
   // Filtered and Sorted products
+  // Local size filtering and sorting
   const filteredProducts = useMemo(() => {
     return products
       .filter((p) => {
-        const matchCategory =
-          filters.category.length === 0 ||
-          filters.category.includes(p.category);
-
-        const matchCollection =
-          filters.collection.length === 0 ||
-          filters.collection.includes(p.collectionName); // ⚠️ FIX
-
+        // Size isn't filtered on backend yet, so filter locally
         const matchSize =
           filters.size.length === 0 ||
           (p.sizes || []).some((s: string) => filters.size.includes(s));
 
-        const matchPrice =
-          (p.discountPrice || p.price) >= filters.price[0] &&
-          (p.discountPrice || p.price) <= filters.price[1];
-
-        return matchCategory && matchCollection && matchSize && matchPrice;
+        return matchSize;
       })
       .sort((a, b) => {
         if (sort === "price-asc")
@@ -137,7 +151,7 @@ export default function ProductList() {
 
         return 0;
       });
-  }, [products, filters, sort]);
+  }, [products, filters.size, sort]);
 
   const activeFilters = [
     ...filters.category,
@@ -287,8 +301,22 @@ export default function ProductList() {
                 hidden: {},
                 show: { transition: { staggerChildren: 0.08 } },
               }}
-              className="grid grid-cols-2 md:grid-cols-3 gap-5 md:gap-7"
+              className="grid grid-cols-2 md:grid-cols-3 gap-5 md:gap-7 relative"
             >
+              {loading && (
+                <div className="absolute inset-0 bg-white/60 z-10 flex items-start justify-center pt-20 backdrop-blur-sm">
+                  <div className="flex flex-col items-center">
+                    <div className="w-10 h-10 border-4 border-[#EADFD8] border-t-[#5E2A14] animate-spin mb-4"></div>
+                    <p className="text-[#5E2A14] font-medium animate-pulse">Loading items...</p>
+                  </div>
+                </div>
+              )}
+              {filteredProducts.length === 0 && !loading && (
+                <div className="col-span-full py-20 text-center text-gray-500 font-medium">
+                  No products found for these filters. Try clearing some.
+                </div>
+              )}
+
               {filteredProducts.map((p) => (
                 <motion.div
                   key={p.id}

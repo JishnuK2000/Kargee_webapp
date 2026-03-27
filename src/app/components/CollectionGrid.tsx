@@ -5,7 +5,7 @@ import pic3 from "../../assets/images/p2.jpg";
 import { motion } from "framer-motion";
 
 export default function CollectionGrid() {
-const navigate=useNavigate()
+  const navigate = useNavigate();
   // 🔥 Text stagger
   const container = {
     hidden: {},
@@ -38,9 +38,7 @@ const navigate=useNavigate()
   return (
     <section className="py-6 md:py-20 overflow-hidden">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-
           {/* IMAGE GRID */}
           <motion.div
             className="order-1 md:order-2 grid grid-cols-2 gap-4"
@@ -49,7 +47,6 @@ const navigate=useNavigate()
             whileInView="show"
             viewport={{ once: true }}
           >
-            
             {/* BIG IMAGE */}
             <motion.div
               variants={image}
@@ -91,18 +88,16 @@ const navigate=useNavigate()
                 transition={{ duration: 0.5 }}
               />
             </motion.div>
-
           </motion.div>
 
           {/* CONTENT */}
           <motion.div
-            className="order-2 md:order-1"
+            className="order-2 md:order-1 text-center md:text-left"
             variants={container}
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
           >
-
             <motion.h2
               variants={item}
               className="text-3xl md:text-4xl font-semibold mb-4"
@@ -114,13 +109,11 @@ const navigate=useNavigate()
               variants={item}
               className="text-3xl md:text-4xl font-semibold mb-4"
             >
-              Where Timeless Tradition Meets Modern Grace in Every Beautifully Crafted Outfit
+              Where Timeless Tradition Meets Modern Grace in Every Beautifully
+              Crafted Outfit
             </motion.h1>
 
-            <motion.p
-              variants={item}
-              className="text-gray-700 mb-6"
-            >
+            <motion.p variants={item} className="text-gray-700 mb-6">
               Step into the spotlight with this stunning mirror-work coord set
               that beautifully blends tradition with modern elegance. Crafted
               with intricate mirror detailing and graceful design, it offers the
@@ -130,17 +123,15 @@ const navigate=useNavigate()
 
             <motion.button
               variants={item}
-               onClick={() => navigate("/products")}
+              onClick={() => navigate("/products")}
               whileHover={{ scale: 1.07, y: -2 }}
               whileTap={{ scale: 0.95 }}
               transition={{ duration: 0.3 }}
-              className="bg-[#5E2A14] text-white px-6 py-3 w-fit hover:bg-[#7a3a1f]"
+              className="bg-[#5E2A14] text-white px-6 py-3 w-fit mx-auto md:mx-0 hover:bg-[#7a3a1f]"
             >
               Explore Collections
             </motion.button>
-
           </motion.div>
-
         </div>
       </div>
     </section>

@@ -45,14 +45,14 @@ export default function HeroCarousel() {
     },
   ];
   return (
-    <section className="w-full">
+    <section className="w-full bg-white">
       <Swiper
         modules={[Pagination, Autoplay]}
         slidesPerView={1}
         loop={true}
         pagination={{ clickable: true }}
         autoplay={{ delay: 4000 }}
-        className="custom-swiper"
+        className="custom-swiper "
       >
         {slides.map((slide) => (
           <SwiperSlide key={slide.id}>

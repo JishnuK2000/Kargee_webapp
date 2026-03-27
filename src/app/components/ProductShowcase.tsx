@@ -63,7 +63,7 @@ export default function ProductShowcase() {
             whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
             transition={{ duration: 0.9 }}
             viewport={{ once: true }}
-            className="text-2xl md:text-3xl mb-2"
+            className="text-3xl md:text-4xl font-semibold mb-4"
           >
             Crafted in Every Detail
           </motion.h1>

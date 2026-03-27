@@ -1,5 +1,6 @@
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
-
+import logo from "../../assets/icons/logo.svg";
+import { Link, useNavigate } from "react-router-dom";
 export default function Footer() {
   const company = ['About Us', 'Our Story', 'Careers', 'Press'];
   const customerService = ['Track Order', 'Size Guide', 'Shipping Info', 'FAQs'];
@@ -11,9 +12,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-12">
           {/* Company Info */}
           <div>
-            <h3 className="text-2xl md:text-3xl mb-4" style={{ fontFamily: 'var(--font-heading)' }}>
-              Kargee
-            </h3>
+             <Link to="/" className="flex items-center">
+            <img src={logo} alt="Kargee Logo" className="h-10 md:h-14" />
+          </Link>
             <p className="text-white/80 mb-6 leading-relaxed">
               Crafting timeless ethnic fashion with modern elegance since 2020.
             </p>
@@ -44,7 +45,7 @@ export default function Footer() {
 
           {/* Company Links */}
           <div>
-            <h4 className="text-lg mb-4">Company</h4>
+            <h4 className="text-lg mb-4 font-[inter]">Company</h4>
             <ul className="space-y-2">
               {company.map((link) => (
                 <li key={link}>
@@ -58,7 +59,7 @@ export default function Footer() {
 
           {/* Customer Service */}
           <div>
-            <h4 className="text-lg mb-4">Customer Service</h4>
+            <h4 className="text-lg mb-4 font-[inter]">Customer Service</h4>
             <ul className="space-y-2">
               {customerService.map((link) => (
                 <li key={link}>
@@ -72,7 +73,7 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h4 className="text-lg mb-4">Contact</h4>
+            <h4 className="text-lg mb-4 font-[inter]">Contact</h4>
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
                 <Mail className="w-5 h-5 mt-0.5 flex-shrink-0" />
