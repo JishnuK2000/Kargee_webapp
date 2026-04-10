@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../../Services/apiService";
 import { Order } from "./userProfile";
 
 interface OrderDetailProps {
@@ -7,14 +7,11 @@ interface OrderDetailProps {
   onBack: () => void;
 }
 
-// @ts-ignore
-const API = import.meta.env.VITE_API_URL;
-
 const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onBack }) => {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const token = localStorage.getItem("userToken");
+  const accessToken = localStorage.getItem("accessToken");
 
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState("");
@@ -36,10 +33,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onBack }) => {
     try {
       setLoading(true);
       setError("");
-      // Using generic /orders/:id route (assuming it returns { order: ... } or just order)
-      const res = await axios.get(`${API}/orders/${orderId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get(`/orders/${orderId}`);
       setOrder(res.data.order || res.data);
     } catch (err: any) {
       setError("Failed to load order details. Please try again later.");
@@ -57,18 +51,12 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onBack }) => {
 
     try {
       setIsSubmitting(true);
-      await axios.post(
-        `${API}/support/tickets`,
-        {
-          orderId: order._id,
-          ticketType,
-          subject,
-          description: feedbackText,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.post(`/support/tickets`, {
+        orderId: order._id,
+        ticketType,
+        subject,
+        description: feedbackText,
+      });
       alert("Ticket submitted successfully! Our team will get back to you soon.");
       setFeedbackText("");
       setSubject("");
@@ -90,19 +78,13 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onBack }) => {
 
     try {
       setIsSubmitting(true);
-      await axios.post(
-        `${API}/reviews`,
-        {
-          productId: selectedProductId,
-          orderId: order._id,
-          rating,
-          reviewTitle,
-          reviewText,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.post(`/reviews`, {
+        productId: selectedProductId,
+        orderId: order._id,
+        rating,
+        reviewTitle,
+        reviewText,
+      });
       alert("Review submitted successfully!");
       setShowReviewModal(false);
       setReviewTitle("");

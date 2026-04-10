@@ -17,7 +17,7 @@ const ProtectedRoute: React.FC<Props> = ({ children }) => {
 
   // ✅ Check token on mount
   useEffect(() => {
-    const token = localStorage.getItem("userToken");
+    const token = localStorage.getItem("accessToken");
     if (token) {
       setIsAuthenticated(true);
     } else {

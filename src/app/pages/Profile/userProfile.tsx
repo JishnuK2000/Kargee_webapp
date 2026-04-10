@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import Layout from "../../components/layout";
-import axios from "axios";
+import api from "../../..//Services/apiService";
 import OrderDetail from "./OrderDetail";
+
 interface Address {
   name?: string;
   phone?: string;
@@ -40,8 +41,6 @@ export interface Order {
   createdAt?: string;
 }
 
-const API = import.meta.env.VITE_API_URL;
-
 const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<User | null>(
     JSON.parse(localStorage.getItem("user") || "null")
@@ -57,21 +56,19 @@ const ProfilePage: React.FC = () => {
   const [ordersError, setOrdersError] = useState("");
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  const token = localStorage.getItem("userToken");
+  const accessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
-    if (activeTab === "orders" && token) {
+    if (activeTab === "orders" && accessToken) {
       fetchOrders();
     }
   }, [activeTab]);
-  console.log(user, "??????????????")
+
   const fetchOrders = async () => {
     try {
       setLoadingOrders(true);
       setOrdersError("");
-      const res = await axios.get(`${API}/orders/user/${user?._id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get(`/orders/user/${user?._id}`);
       setOrders(res.data.orders || res.data || []);
     } catch (err: any) {
       setOrdersError("Failed to load orders. Please try again later.");
@@ -80,10 +77,10 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-
   const handleLogout = () => {
     localStorage.removeItem("user");
-    localStorage.removeItem("userToken");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     window.location.reload();
   };
 
@@ -94,17 +91,12 @@ const ProfilePage: React.FC = () => {
     setMessage("");
 
     try {
-      const res = await axios.put(
-        `${API}/user/profile`,
+      const res = await api.put(
+        `/user/profile`,
         {
           name: user.name,
           profilePicture: user.profilePicture,
           addresses: user.addresses,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
 
@@ -260,112 +252,112 @@ const ProfilePage: React.FC = () => {
                       My Orders
                     </h2>
 
-                {loadingOrders ? (
-                  <div className="flex flex-col items-center justify-center py-16 space-y-4">
-                    <div className="w-10 h-10 border-4 border-[#EADFD8] border-t-[#5E2A14] animate-spin"></div>
-                    <p className="text-gray-500 font-medium animate-pulse">Fetching your orders...</p>
-                  </div>
-                ) : ordersError ? (
-                  <div className="bg-red-50 border border-red-100 p-4 md:p-6 flex items-start gap-4 shadow-sm">
-                    <span className="text-red-500 text-xl">⚠️</span>
-                    <div>
-                      <h3 className="text-red-800 font-medium">Unable to load orders</h3>
-                      <p className="text-red-600 text-sm mt-1">{ordersError}</p>
-                    </div>
-                  </div>
-                ) : orders.length === 0 ? (
-                  <div className="bg-[#fcfaf9] border border-gray-100 p-8 md:p-12  text-center shadow-sm">
-                    <div className="w-20 h-20 bg-[#f4ece7] flex items-center justify-center mx-auto mb-5 text-3xl shadow-inner">
-                      📦
-                    </div>
-                    <h3 className="text-gray-800 font-semibold text-lg">No orders yet</h3>
-                    <p className="text-gray-500 mt-2 max-w-sm mx-auto">Looks like you haven't made your first purchase. Check out our latest collections!</p>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {orders.map((order) => (
-                      <div 
-                        key={order._id} 
-                        onClick={() => setSelectedOrderId(order._id)}
-                        className="border border-gray-200 bg-white overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
-                      >
-
-                        {/* Order Header */}
-                        <div className="bg-[#fcfaf9] border-b border-gray-100 p-4 md:px-6 md:py-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                          <div className="space-y-1.5">
-                            <div className="flex items-center gap-3">
-                              <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
-                                Order
-                              </p>
-                              <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs font-mono font-medium">#{order._id.substring(order._id.length - 8).toUpperCase()}</span>
-                            </div>
-                            <p className="text-xs md:text-sm text-gray-500">
-                              Placed on: <span className="font-medium text-gray-800">{order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</span>
-                            </p>
-                          </div>
-
-                          <div className="flex items-center justify-between md:justify-end gap-5 border-t border-gray-200 md:border-0 pt-4 md:pt-0">
-                            <span className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md w-max
-                              ${order.status?.toLowerCase() === 'delivered' ? 'bg-green-50 text-green-700 border border-green-200' :
-                                order.status?.toLowerCase() === 'cancelled' ? 'bg-red-50 text-red-700 border border-red-200' :
-                                  'bg-blue-50 text-blue-700 border border-blue-200'}`}>
-                              {order.status || 'Processing'}
-                            </span>
-                            <div className="text-right">
-                              <p className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-0.5">Total</p>
-                              <p className="text-lg md:text-xl font-bold text-[#5E2A14]">₹{order.totalAmount}</p>
-                            </div>
-                          </div>
+                    {loadingOrders ? (
+                      <div className="flex flex-col items-center justify-center py-16 space-y-4">
+                        <div className="w-10 h-10 border-4 border-[#EADFD8] border-t-[#5E2A14] animate-spin"></div>
+                        <p className="text-gray-500 font-medium animate-pulse">Fetching your orders...</p>
+                      </div>
+                    ) : ordersError ? (
+                      <div className="bg-red-50 border border-red-100 p-4 md:p-6 flex items-start gap-4 shadow-sm">
+                        <span className="text-red-500 text-xl">⚠️</span>
+                        <div>
+                          <h3 className="text-red-800 font-medium">Unable to load orders</h3>
+                          <p className="text-red-600 text-sm mt-1">{ordersError}</p>
                         </div>
+                      </div>
+                    ) : orders.length === 0 ? (
+                      <div className="bg-[#fcfaf9] border border-gray-100 p-8 md:p-12  text-center shadow-sm">
+                        <div className="w-20 h-20 bg-[#f4ece7] flex items-center justify-center mx-auto mb-5 text-3xl shadow-inner">
+                          📦
+                        </div>
+                        <h3 className="text-gray-800 font-semibold text-lg">No orders yet</h3>
+                        <p className="text-gray-500 mt-2 max-w-sm mx-auto">Looks like you haven't made your first purchase. Check out our latest collections!</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        {orders.map((order) => (
+                          <div
+                            key={order._id}
+                            onClick={() => setSelectedOrderId(order._id)}
+                            className="border border-gray-200 bg-white overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
+                          >
 
-                        {/* Order Items */}
-                        <div className="p-4 md:p-6 space-y-5">
-                          {order.products.map((item, idx) => (
-                            <div key={idx} className="flex gap-4 md:gap-6 items-start md:items-center">
-                              <div className="w-20 h-24 md:w-24 md:h-24 bg-gray-50 overflow-hidden flex-shrink-0 border border-gray-100 p-1">
-                                <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            {/* Order Header */}
+                            <div className="bg-[#fcfaf9] border-b border-gray-100 p-4 md:px-6 md:py-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                              <div className="space-y-1.5">
+                                <div className="flex items-center gap-3">
+                                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+                                    Order
+                                  </p>
+                                  <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs font-mono font-medium">#{order._id.substring(order._id.length - 8).toUpperCase()}</span>
+                                </div>
+                                <p className="text-xs md:text-sm text-gray-500">
+                                  Placed on: <span className="font-medium text-gray-800">{order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</span>
+                                </p>
                               </div>
 
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-semibold text-gray-800 text-sm md:text-base line-clamp-2 md:line-clamp-1 mb-2 hover:text-[#5E2A14] transition-colors font-[inter]">{item.name}</h4>
-
-                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs md:text-sm">
-                                  <span className="inline-flex items-center gap-1.5 text-gray-600 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
-                                    <span className="text-gray-400">Qty</span>
-                                    <span className="font-semibold text-gray-800">{item.quantity}</span>
-                                  </span>
-
-                                  {item.size && (
-                                    <span className="inline-flex items-center gap-1.5 text-gray-600">
-                                      <span className="text-gray-400">Size</span>
-                                      <span className="font-semibold text-gray-800 uppercase">{item.size}</span>
-                                    </span>
-                                  )}
-
-                                  {item.color && (
-                                    <span className="inline-flex items-center gap-2 text-gray-600">
-                                      <span className="text-gray-400">Color</span>
-                                      <div className="flex items-center gap-1.5">
-                                        <span className="w-4 h-4 border border-gray-300 shadow-sm" style={{ backgroundColor: item.color.toLowerCase() }} />
-                                        <span className="font-medium text-gray-800 capitalize hidden sm:inline">{item.color}</span>
-                                      </div>
-                                    </span>
-                                  )}
+                              <div className="flex items-center justify-between md:justify-end gap-5 border-t border-gray-200 md:border-0 pt-4 md:pt-0">
+                                <span className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md w-max
+                              ${order.status?.toLowerCase() === 'delivered' ? 'bg-green-50 text-green-700 border border-green-200' :
+                                    order.status?.toLowerCase() === 'cancelled' ? 'bg-red-50 text-red-700 border border-red-200' :
+                                      'bg-blue-50 text-blue-700 border border-blue-200'}`}>
+                                  {order.status || 'Processing'}
+                                </span>
+                                <div className="text-right">
+                                  <p className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-0.5">Total</p>
+                                  <p className="text-lg md:text-xl font-bold text-[#5E2A14]">₹{order.totalAmount}</p>
                                 </div>
                               </div>
-
-                              <div className="text-right flex-shrink-0 self-center">
-                                <p className="font-semibold text-gray-800 md:text-lg">₹{(item.discountPrice || item.price) * item.quantity}</p>
-                              </div>
                             </div>
-                          ))}
-                        </div>
 
+                            {/* Order Items */}
+                            <div className="p-4 md:p-6 space-y-5">
+                              {order.products.map((item, idx) => (
+                                <div key={idx} className="flex gap-4 md:gap-6 items-start md:items-center">
+                                  <div className="w-20 h-24 md:w-24 md:h-24 bg-gray-50 overflow-hidden flex-shrink-0 border border-gray-100 p-1">
+                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                  </div>
+
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-semibold text-gray-800 text-sm md:text-base line-clamp-2 md:line-clamp-1 mb-2 hover:text-[#5E2A14] transition-colors font-[inter]">{item.name}</h4>
+
+                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs md:text-sm">
+                                      <span className="inline-flex items-center gap-1.5 text-gray-600 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
+                                        <span className="text-gray-400">Qty</span>
+                                        <span className="font-semibold text-gray-800">{item.quantity}</span>
+                                      </span>
+
+                                      {item.size && (
+                                        <span className="inline-flex items-center gap-1.5 text-gray-600">
+                                          <span className="text-gray-400">Size</span>
+                                          <span className="font-semibold text-gray-800 uppercase">{item.size}</span>
+                                        </span>
+                                      )}
+
+                                      {item.color && (
+                                        <span className="inline-flex items-center gap-2 text-gray-600">
+                                          <span className="text-gray-400">Color</span>
+                                          <div className="flex items-center gap-1.5">
+                                            <span className="w-4 h-4 border border-gray-300 shadow-sm" style={{ backgroundColor: item.color.toLowerCase() }} />
+                                            <span className="font-medium text-gray-800 capitalize hidden sm:inline">{item.color}</span>
+                                          </div>
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <div className="text-right flex-shrink-0 self-center">
+                                    <p className="font-semibold text-gray-800 md:text-lg">₹{(item.discountPrice || item.price) * item.quantity}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                )}
-                </>
+                    )}
+                  </>
                 )}
               </div>
             )}

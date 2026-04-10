@@ -11,6 +11,7 @@ import InstagramSection from "../../components/InstagramSection";
 import SupportSection from "../../components/SupportSection";
 import Footer from "../../components/Footer";
 import LoginModal from "../../components/LoginModal";
+import Home4Grid from "../../components/Home4Grid";
 import { useEffect, useState } from "react";
 import { User } from "../../../types";
 
@@ -22,9 +23,9 @@ export default function Home() {
 
   useEffect(() => {
     const modalClosed = localStorage.getItem("loginModalClosed");
-    const userToken = localStorage.getItem("userToken");
+    const accessToken = localStorage.getItem("accessToken");
 
-    if (!modalClosed && !userToken) {
+    if (!modalClosed && !accessToken) {
       const timer = setTimeout(() => setShowModal(true), 10000); // 10 seconds
       return () => clearTimeout(timer);
     }
@@ -61,7 +62,9 @@ export default function Home() {
       <Hero />
       <Features />
       <BannerSection />
+      <Home4Grid />
       <CollectionGrid />
+
       <CategoryCards />
       <PromoBanner />
       <ProductShowcase />

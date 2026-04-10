@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Layout from "../../components/layout";
 import { useCart } from "../../../context/cartContext";
-
+import api from "../../../Services/apiService";
 export default function Checkout() {
   const { state } = useLocation();
   const navigate = useNavigate();
@@ -15,8 +15,7 @@ export default function Checkout() {
   // For single product checkout: read from navigation state
   const product = isCartCheckout ? cart : state?.product;
 
-  const API = import.meta.env.VITE_API_URL;
-  const token = localStorage.getItem("userToken");
+  const accessToken = localStorage.getItem("accessToken");
 
   const [step, setStep] = useState(1);
   const [address, setAddress] = useState({
@@ -83,30 +82,30 @@ export default function Checkout() {
   // Build order products array (works for both cart and single product)
   const orderProducts = Array.isArray(product)
     ? product.map((p) => ({
-        productId: p.id,
-        name: p.name,
-        price: p.price,
-        discountPrice: p.discountPrice || p.price,
-        quantity: p.quantity,
-        image: p.image,
-        size: p.size || "",
-        color: p.color || "",
-        // Keep cartItemId alongside for post-order cleanup
-        cartItemId: p.cartItemId,
-      }))
+      productId: p.id,
+      name: p.name,
+      price: p.price,
+      discountPrice: p.discountPrice || p.price,
+      quantity: p.quantity,
+      image: p.image,
+      size: p.size || "",
+      color: p.color || "",
+      // Keep cartItemId alongside for post-order cleanup
+      cartItemId: p.cartItemId,
+    }))
     : [
-        {
-          productId: product.id,
-          name: product.name,
-          price: product.price,
-          discountPrice: product.discountPrice || product.price,
-          quantity: product.quantity,
-          image: product.image,
-          size: product.size || "",
-          color: product.color || "",
-          cartItemId: product.cartItemId,
-        },
-      ];
+      {
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        discountPrice: product.discountPrice || product.price,
+        quantity: product.quantity,
+        image: product.image,
+        size: product.size || "",
+        color: product.color || "",
+        cartItemId: product.cartItemId,
+      },
+    ];
 
   const totalAmount = orderProducts.reduce(
     (sum, item) => sum + (item.discountPrice || item.price) * item.quantity,
@@ -134,31 +133,19 @@ export default function Checkout() {
       // Strip cartItemId before sending to backend
       const payload = orderProducts.map(({ cartItemId, ...rest }) => rest);
 
-      const res = await fetch(`${API}/orders`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          products: payload,
-          address,
-          paymentMethod,
-          totalAmount,
-        }),
+      await api.post(`/orders`, {
+        products: payload,
+        address,
+        paymentMethod,
+        totalAmount,
       });
 
-      if (res.ok) {
-        await clearOrderedItemsFromCart(); // ✅ clear only after confirmed
-        alert("Order placed successfully!");
-        navigate("/");
-      } else {
-        const data = await res.json();
-        alert(data.message || "Something went wrong");
-      }
-    } catch (err) {
+      await clearOrderedItemsFromCart(); // ✅ clear only after confirmed
+      alert("Order placed successfully!");
+      navigate("/");
+    } catch (err: any) {
       console.error(err);
-      alert("Error placing order");
+      alert(err.response?.data?.message || "Error placing order");
     }
   };
 
@@ -172,9 +159,8 @@ export default function Checkout() {
             {["Address", "Payment", "Summary"].map((label, i) => (
               <div key={i} className="flex-1 text-center">
                 <div
-                  className={`w-10 h-10 mx-auto rounded-full flex items-center justify-center text-sm font-semibold ${
-                    step >= i + 1 ? "bg-[#5E2A14] text-white" : "bg-gray-300"
-                  }`}
+                  className={`w-10 h-10 mx-auto rounded-full flex items-center justify-center text-sm font-semibold ${step >= i + 1 ? "bg-[#5E2A14] text-white" : "bg-gray-300"
+                    }`}
                 >
                   {i + 1}
                 </div>
@@ -323,11 +309,10 @@ export default function Checkout() {
                   <div
                     key={method}
                     onClick={() => setPaymentMethod(method)}
-                    className={`border p-4 cursor-pointer rounded-xl transition ${
-                      paymentMethod === method
+                    className={`border p-4 cursor-pointer rounded-xl transition ${paymentMethod === method
                         ? "border-[#5E2A14] bg-[#f8f3f0]"
                         : ""
-                    }`}
+                      }`}
                   >
                     {method === "COD" ? "Cash on Delivery" : "Online Payment"}
                   </div>

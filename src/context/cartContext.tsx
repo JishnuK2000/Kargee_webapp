@@ -52,14 +52,15 @@ export const CartProvider = ({ children }: any) => {
   const [user] = useState<any>(
     JSON.parse(localStorage.getItem("user") || "null")
   );
-  const token = localStorage.getItem("userToken");
+  const accessToken = localStorage.getItem("accessToken");
+  const refreshToken = localStorage.getItem("refreshToken");
 
   // Load cart on mount
   useEffect(() => {
     const loadCart = async () => {
       try {
-        if (user && token) {
-          const res = await getCartAPI(token);
+        if (user && accessToken) {
+          const res = await getCartAPI();
           setCart(res.data.map(formatItem));
         } else {
           const saved = localStorage.getItem("cart");
@@ -73,7 +74,7 @@ export const CartProvider = ({ children }: any) => {
     };
 
     loadCart();
-  }, [user, token]);
+  }, [user, accessToken]);
 
   // Persist guest cart to localStorage
   useEffect(() => {
@@ -84,7 +85,7 @@ export const CartProvider = ({ children }: any) => {
 
   // ➕ Add to cart
   const addToCart = async (item: Omit<CartItem, "cartItemId">) => {
-    if (user && token) {
+    if (user && accessToken) {
       try {
         // Backend handles merging (same productId + size + color → qty++)
         // Always sync from response so cartItemId stays accurate
@@ -97,8 +98,7 @@ export const CartProvider = ({ children }: any) => {
             quantity: item.quantity,
             size: item.size,
             color: item.color,
-          },
-          token
+          }
         );
         setCart(res.data.map(formatItem));
       } catch (err) {
@@ -131,13 +131,13 @@ export const CartProvider = ({ children }: any) => {
   const removeFromCart = async (cartItemId: string) => {
     setCart((prev) => prev.filter((p) => p.cartItemId !== cartItemId));
 
-    if (user && token) {
+    if (user && accessToken) {
       try {
-        await removeCartAPI(cartItemId, token);
+        await removeCartAPI(cartItemId);
       } catch (err) {
         console.error("removeFromCart error:", err);
         // Rollback on failure
-        const res = await getCartAPI(token);
+        const res = await getCartAPI();
         setCart(res.data.map(formatItem));
       }
     }
@@ -153,12 +153,12 @@ export const CartProvider = ({ children }: any) => {
       )
     );
 
-    if (user && token) {
+    if (user && accessToken) {
       try {
-        await updateCartAPI(cartItemId, newQty, token);
+        await updateCartAPI(cartItemId, newQty);
       } catch (err) {
         console.error("updateQuantity error:", err);
-        const res = await getCartAPI(token);
+        const res = await getCartAPI();
         setCart(res.data.map(formatItem));
       }
     }

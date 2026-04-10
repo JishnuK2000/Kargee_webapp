@@ -56,10 +56,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess }) => {
         otp,
       });
 
-      const { token, user } = res.data;
+      const { accessToken, refreshToken, user } = res.data;
 
       // ✅ Save auth
-      localStorage.setItem("userToken", token);
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
       localStorage.setItem("user", JSON.stringify(user));
 
       // 🔥 STEP 1: GET LOCAL CART
@@ -68,7 +69,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess }) => {
       // 🔥 STEP 2: MERGE TO BACKEND
       if (localCart.length > 0) {
         try {
-          await mergeCartAPI(localCart, token);
+          await mergeCartAPI(localCart);
           localStorage.removeItem("cart"); // clear local
         } catch (mergeErr) {
           console.error("Cart merge failed:", mergeErr);
