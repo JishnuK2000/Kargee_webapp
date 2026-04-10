@@ -107,7 +107,7 @@ const Home4Grid: React.FC = () => {
                 src={item.imageUrl}
                 alt={item.title}
                 variants={imageVariants}
-                className="w-full h-full object-cover"
+                className=" object-contain"
               />
 
               {/* Luxury Gradient Overlay */}

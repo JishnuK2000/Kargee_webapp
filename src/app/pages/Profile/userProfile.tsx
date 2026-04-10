@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Layout from "../../components/layout";
 import api from "../../..//Services/apiService";
 import OrderDetail from "./OrderDetail";
+import { useNavigate } from "react-router-dom";
 
 interface Address {
   name?: string;
@@ -45,7 +46,7 @@ const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<User | null>(
     JSON.parse(localStorage.getItem("user") || "null")
   );
-
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("profile");
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -81,6 +82,7 @@ const ProfilePage: React.FC = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    navigate("/")
     window.location.reload();
   };
 

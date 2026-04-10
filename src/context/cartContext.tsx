@@ -85,10 +85,12 @@ export const CartProvider = ({ children }: any) => {
 
   // ➕ Add to cart
   const addToCart = async (item: Omit<CartItem, "cartItemId">) => {
+
     if (user && accessToken) {
       try {
         // Backend handles merging (same productId + size + color → qty++)
         // Always sync from response so cartItemId stays accurate
+        console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
         const res = await addToCartAPI(
           {
             productId: item.id,
@@ -102,6 +104,7 @@ export const CartProvider = ({ children }: any) => {
         );
         setCart(res.data.map(formatItem));
       } catch (err) {
+        console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
         console.error("addToCart error:", err);
       }
     } else {

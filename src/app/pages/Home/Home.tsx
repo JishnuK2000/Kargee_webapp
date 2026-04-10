@@ -43,10 +43,10 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Top banner */}
-      <div className="w-full bg-[#5E2A14] text-white text-sm font-inter text-center py-2">
+      {/* <div className="w-full bg-[#5E2A14] text-white text-sm font-inter text-center py-2">
         Sign up and <strong>GET 15% OFF</strong> for your first order.{" "}
         <button className="underline font-semibold ml-1">Sign Up Now</button>
-      </div>
+      </div> */}
 
       {/* Login */}
 
@@ -63,8 +63,7 @@ export default function Home() {
       <Features />
       <BannerSection />
       <Home4Grid />
-      <CollectionGrid />
-
+      {/* <CollectionGrid /> */}
       <CategoryCards />
       <PromoBanner />
       <ProductShowcase />
