@@ -167,7 +167,7 @@ export default function ProductList() {
   return (
     <Layout>
       <section className="min-h-screen pb-24 md:pb-0 font-[Inter]">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6 md:py-10">
+        <div className=" max-w-[1400px] mx-auto px-4 md:px-6 py-6 md:py-10">
           {/* HEADER */}
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl md:text-3xl font-medium font-[Inter]">

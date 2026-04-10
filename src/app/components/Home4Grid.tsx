@@ -84,7 +84,7 @@ const Home4Grid: React.FC = () => {
 
   return (
     <section className="py-16 md:py-24 bg-white overflow-hidden">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className=" max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10"
           variants={containerVariants}

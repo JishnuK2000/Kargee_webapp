@@ -50,7 +50,7 @@ export default function Features() {
 
   return (
     <section className="py-6 md:py-16">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className=" max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
 
         <motion.div
           className="grid grid-cols-4 gap-4 md:gap-12"
@@ -67,7 +67,7 @@ export default function Features() {
               whileHover={{ y: -5 }}
               transition={{ duration: 0.3 }}
             >
-              
+
               {/* ICON */}
               <motion.div
                 whileHover={{ scale: 1.1, rotate: 2 }}

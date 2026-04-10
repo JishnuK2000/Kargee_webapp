@@ -54,7 +54,7 @@ function ParallaxImage({ src, alt }) {
 export default function ProductShowcase() {
   return (
     <section className="py-6 md:py-20 overflow-hidden">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className=" max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* TEXT */}
         <div className="mb-10 md:mb-16">
@@ -100,7 +100,7 @@ export default function ProductShowcase() {
 
             {/* TOP ROW */}
             <div className="flex gap-4 md:gap-6 flex-1">
-              
+
               <motion.div
                 className="flex-1 overflow-hidden"
                 initial={{ opacity: 0, scale: 1.1 }}

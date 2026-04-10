@@ -41,7 +41,7 @@ export default function BannerSection() {
 
   return (
     <section className="py-6 md:py-20 overflow-hidden">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className=" max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* IMAGE → FIRST IN MOBILE */}
           <motion.div
@@ -62,7 +62,7 @@ export default function BannerSection() {
 
           {/* CONTENT → BELOW IMAGE IN MOBILE */}
           <motion.div
-          
+
             className="space-y-6 text-center lg:text-left order-2 lg:order-2 mt-6 lg:mt-0"
             variants={container}
             initial="hidden"

@@ -4,7 +4,7 @@ import pic5 from "../../assets/images/pic5.jpg";
 import { motion } from "framer-motion";
 
 export default function CategoryCards() {
-  const navigate=useNavigate()
+  const navigate = useNavigate()
   const categories = [
     {
       title: "The Art of Summer Dressing",
@@ -18,7 +18,7 @@ export default function CategoryCards() {
 
   return (
     <section className="py-6 md:py-20 overflow-hidden">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className=" max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
 
@@ -72,7 +72,7 @@ export default function CategoryCards() {
                   </h3>
 
                   <motion.button
-                    whileHover={{ scale: 1.08, y: -2 }}  onClick={() => navigate("/products")}
+                    whileHover={{ scale: 1.08, y: -2 }} onClick={() => navigate("/products")}
                     whileTap={{ scale: 0.95 }}
                     transition={{ duration: 0.3 }}
                     className="bg-[#5E2A14] text-white px-5 py-2 text-sm hover:bg-[#7a3a1f]"
