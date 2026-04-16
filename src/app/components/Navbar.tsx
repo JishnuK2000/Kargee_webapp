@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import OTPLogin from "./OTPLogin";
@@ -10,47 +10,74 @@ import cartIcon from "../../assets/icons/cart.png";
 import userIcon from "../../assets/icons/user.png";
 import menuIcon from "../../assets/icons/menu.png";
 import closeIcon from "../../assets/icons/close.png";
+
 import { useCart } from "../../context/cartContext";
-import LoginModal from "../components/LoginModal"; // adjust path if needed
+import LoginModal from "../components/LoginModal";
+
 interface User {
   _id: string;
   name: string;
   mobile: string;
 }
 
-
 export default function Navbar() {
   const { cart } = useCart();
   const [user, setUser] = useState<User | null>(
-  JSON.parse(localStorage.getItem("user") || "null"),
-);
+    JSON.parse(localStorage.getItem("user") || "null")
+  );
+
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
   const navigate = useNavigate();
-  // 🔥 Hover state
-  const [activeIndex, setActiveIndex] = useState(null);
+
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0 });
 
-  const navRefs = useRef([]);
+  const navRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const [collections, setCollections] = useState<any[]>([]);
 
   const navLinks = [
     {
       name: "Shop",
-      dropdown: ["All Products", "Best Sellers", "Trending"],
+      dropdown: [
+        "All Products",
+        ...collections.slice(0, 5).map((c: any) => c.name),
+      ],
     },
-    {
-      name: "Collections",
-      dropdown: ["Summer Wear", "Festive", "New Arrivals"],
-    },
-    { name: "New Arrivals" },
-    { name: "Festive" },
-    { name: "Summer" },
+    { name: "About Us" },
     { name: "Contact Us" },
   ];
 
-  // 🔥 Handle hover for underline
-  const handleHover = (index) => {
+  // ✅ Fetch Collections
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/collections`);
+        const data = await res.json();
+        setCollections(data);
+      } catch (err) {
+        console.error("Error fetching collections:", err);
+      }
+    };
+    fetchCollections();
+  }, []);
+
+  // ✅ Scroll detection
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleHover = (index: number) => {
     const el = navRefs.current[index];
     if (el) {
       setUnderlineStyle({
@@ -60,16 +87,24 @@ export default function Navbar() {
     }
     setActiveIndex(index);
   };
+
   const handleLoginSuccess = (loggedInUser: User) => {
     setUser(loggedInUser);
   };
+
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-gray-100">
+    <nav
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled
+          ? "bg-white/90 backdrop-blur-md shadow-md border-b border-gray-100"
+          : "bg-transparent"
+        }`}
+    >
       <div className="max-w-screen-2xl mx-auto px-2 sm:px-4 lg:px-6">
         <div className="flex items-center justify-between h-20 md:h-24">
+
           {/* LOGO */}
           <Link to="/" className="flex items-center">
-            <img src={logo} alt="Kargee Logo" className="h-10 md:h-14" />
+            <img src={logo} alt="Logo" className="h-10 md:h-14" />
           </Link>
 
           {/* NAV LINKS */}
@@ -86,7 +121,10 @@ export default function Navbar() {
                 <motion.span
                   onClick={() => navigate("/products")}
                   whileHover={{ y: -2 }}
-                  className="text-base md:text-lg text-gray-700 hover:text-[#5E2A14] cursor-pointer font-medium"
+                  className={`text-base md:text-lg cursor-pointer font-medium transition ${isScrolled
+                      ? "text-gray-700 hover:text-[#5E2A14]"
+                      : "text-white hover:text-gray-200"
+                    }`}
                 >
                   {link.name}
                 </motion.span>
@@ -103,14 +141,21 @@ export default function Navbar() {
                     >
                       <div className="py-3">
                         {link.dropdown.map((item) => (
-                          <motion.a
+                          <motion.span
                             key={item}
-                            href="#"
+                            onClick={() => {
+                              if (item === "All Products") {
+                                navigate("/products");
+                              } else {
+                                navigate(`/products?collectionName=${item}`);
+                              }
+                              setActiveIndex(null);
+                            }}
                             whileHover={{ x: 6 }}
-                            className="block px-4 py-2 text-gray-700 hover:text-[#5E2A14] transition"
+                            className="block px-4 py-2 text-gray-700 hover:text-[#5E2A14] cursor-pointer"
                           >
                             {item}
-                          </motion.a>
+                          </motion.span>
                         ))}
                       </div>
                     </motion.div>
@@ -119,7 +164,7 @@ export default function Navbar() {
               </div>
             ))}
 
-            {/* 🔥 SLIDING UNDERLINE */}
+            {/* UNDERLINE */}
             <motion.div
               className="absolute bottom-0 h-[2px] bg-[#5E2A14]"
               animate={{
@@ -134,11 +179,19 @@ export default function Navbar() {
           {/* ICONS */}
           <div className="flex items-center space-x-5 md:space-x-7">
             <button>
-              <img src={searchIcon} className="w-6 h-6 md:w-7 md:h-7" />
+              <img
+                src={searchIcon}
+                className={`w-6 h-6 md:w-7 md:h-7 ${isScrolled ? "" : "invert"
+                  }`}
+              />
             </button>
 
             <button onClick={() => navigate("/cart")} className="relative">
-              <img src={cartIcon} className="w-6 h-6 md:w-7 md:h-7" />
+              <img
+                src={cartIcon}
+                className={`w-6 h-6 md:w-7 md:h-7 ${isScrolled ? "" : "invert"
+                  }`}
+              />
 
               {cartCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-[#5E2A14] text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">
@@ -146,32 +199,28 @@ export default function Navbar() {
                 </span>
               )}
             </button>
-            <button
-              onClick={() => {
-                if (user) {
-                  navigate("/profile");
-                } else {
-                  setIsLoginOpen(true);
-                }
-              }}
-            >
-              <img src={userIcon} className="w-6 h-6 md:w-7 md:h-7" />
-            </button>
 
-            {/* MOBILE MENU */}
             <button
-              className="md:hidden"
               onClick={() => {
-                if (user) {
-                  navigate("/profile");
-                } else {
-                  setIsLoginOpen(true);
-                }
+                if (user) navigate("/profile");
+                else setIsLoginOpen(true);
               }}
             >
               <img
+                src={userIcon}
+                className={`w-6 h-6 md:w-7 md:h-7 ${isScrolled ? "" : "invert"
+                  }`}
+              />
+            </button>
+
+            {/* MOBILE MENU BUTTON */}
+            <button
+              className="md:hidden"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              <img
                 src={isMobileMenuOpen ? closeIcon : menuIcon}
-                className="w-7 h-7"
+                className={`w-7 h-7 ${isScrolled ? "" : "invert"}`}
               />
             </button>
           </div>
@@ -201,7 +250,7 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* OTP LOGIN */}
+      {/* LOGIN MODAL */}
       {isLoginOpen && (
         <LoginModal
           onClose={() => setIsLoginOpen(false)}

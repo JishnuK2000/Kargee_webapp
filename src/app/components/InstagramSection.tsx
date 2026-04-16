@@ -18,7 +18,10 @@ export default function InstagramSection() {
             <p className="text-white/90 text-lg md:text-xl mb-6 ">
               @kargee.co.in
             </p>
-            <button className="bg-white text-[#5E2A14] px-8 py-3 rounded-full hover:bg-[#F5F1ED] transition-all duration-300 shadow-lg">
+            <button
+              onClick={() => window.open("https://www.instagram.com/kargee.co.in/", "_blank")}
+              className="bg-white text-[#5E2A14] px-8 py-3 rounded-full hover:bg-[#F5F1ED] transition-all duration-300 shadow-lg cursor-pointer"
+            >
               Follow Now
             </button>
           </div>

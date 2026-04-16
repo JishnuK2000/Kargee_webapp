@@ -21,7 +21,6 @@ const Home4Grid: React.FC = () => {
       try {
         const response = await fetch(`${API_URL}/home/4grid`);
         const data = await response.json();
-        // Sort items by order if not already sorted
         const sortedData = data.sort((a: GridItem, b: GridItem) => a.order - b.order);
         setItems(sortedData.slice(0, 4));
       } catch (error) {
@@ -34,6 +33,7 @@ const Home4Grid: React.FC = () => {
     fetchGridItems();
   }, [API_URL]);
 
+  // Container animation (unchanged)
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -44,14 +44,22 @@ const Home4Grid: React.FC = () => {
     },
   };
 
+  // 🔥 NEW: Direction-based slide animation
   const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
+    hidden: (index: number) => ({
+      opacity: 0,
+      x: index % 2 === 0 ? -80 : 80, // alternate left/right
+      y: 40,
+      scale: 0.96,
+    }),
     show: {
       opacity: 1,
+      x: 0,
       y: 0,
+      scale: 1,
       transition: {
-        duration: 0.8,
-        ease: [0.25, 0.1, 0.25, 1], // Luxury cubic-bezier
+        duration: 0.9,
+        ease: [0.25, 0.1, 0.25, 1],
       },
     },
   };
@@ -68,7 +76,7 @@ const Home4Grid: React.FC = () => {
     hover: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.4, ease: "easeOut" }
+      transition: { duration: 0.4, ease: "easeOut" },
     },
   };
 
@@ -84,7 +92,7 @@ const Home4Grid: React.FC = () => {
 
   return (
     <section className="py-16 md:py-24 bg-white overflow-hidden">
-      <div className=" max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10"
           variants={containerVariants}
@@ -92,28 +100,33 @@ const Home4Grid: React.FC = () => {
           whileInView="show"
           viewport={{ once: true, amount: 0.1 }}
         >
-          {items.map((item) => (
+          {items.map((item, index) => (
             <motion.div
               key={item._id}
+              custom={index} // 👈 important for direction
               variants={itemVariants}
               className="relative group cursor-pointer overflow-hidden aspect-[4/3] md:aspect-[16/10]"
-              onClick={() => navigate(`/products?category=${encodeURIComponent(item.category)}`)}
-              initial="rest"
+              onClick={() =>
+                navigate(`/products?category=${encodeURIComponent(item.category)}`)
+              }
+              initial="hidden"
+              whileInView="show"
               whileHover="hover"
               animate="rest"
+              viewport={{ once: true }}
             >
               {/* Image */}
               <motion.img
                 src={item.imageUrl}
                 alt={item.title}
                 variants={imageVariants}
-                className=" object-contain"
+                className="object-contain "
               />
 
-              {/* Luxury Gradient Overlay */}
+              {/* Gradient Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
 
-              {/* Content Overlay */}
+              {/* Content */}
               <motion.div
                 className="absolute inset-0 flex flex-col justify-end p-6 md:p-8"
                 variants={overlayVariants}

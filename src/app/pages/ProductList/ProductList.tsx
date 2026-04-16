@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 import { Star, ArrowRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Layout from "../../components/layout";
 import { productsData } from "../../../data/products"; // your new data import
 
@@ -16,6 +16,7 @@ export default function ProductList() {
   const [showSort, setShowSort] = useState(false); // mobile sort drawer
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
 
   // Removed static mount fetch, now dependency driven below.
@@ -46,7 +47,9 @@ export default function ProductList() {
   }, []);
   const [filters, setFilters] = useState({
     category: [] as string[],
-    collection: [] as string[],
+    collection: (searchParams.get("collectionName")
+      ? [searchParams.get("collectionName") as string]
+      : []) as string[],
     size: [] as string[],
     price: [0, 5000] as [number, number],
   });
@@ -124,6 +127,20 @@ export default function ProductList() {
 
     return () => clearTimeout(timer);
   }, [filters.category, filters.collection, filters.price, API]);
+
+  // Sync filters with URL params (for Navbar navigation)
+  useEffect(() => {
+    const colName = searchParams.get("collectionName");
+    if (colName) {
+      setFilters((prev) => ({
+        ...prev,
+        collection: [colName],
+      }));
+    } else if (searchParams.toString() === "" || (!searchParams.has("collectionName") && !searchParams.has("category"))) {
+      // If no relevant params, clear collection filter if it was set via URL
+      // This is optional but helps with "All Products" link
+    }
+  }, [searchParams]);
 
   // Filtered and Sorted products
   // Local size filtering and sorting

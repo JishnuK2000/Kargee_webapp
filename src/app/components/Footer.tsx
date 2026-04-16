@@ -2,7 +2,7 @@ import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react'
 import logo from "../../assets/icons/logo.svg";
 import { Link, useNavigate } from "react-router-dom";
 export default function Footer() {
-  const company = ['About Us', 'Our Story', 'Careers', 'Press'];
+  const company = ['About Us', 'Our Story'];
   const customerService = ['Track Order', 'Size Guide', 'Shipping Info', 'FAQs'];
   const policies = ['Privacy Policy', 'Terms & Conditions', 'Return Policy', 'Payment Terms'];
 
@@ -12,9 +12,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-12">
           {/* Company Info */}
           <div>
-             <Link to="/" className="flex items-center">
-            <img src={logo} alt="Kargee Logo" className="h-10 md:h-14" />
-          </Link>
+            <Link to="/" className="flex items-center">
+              <img src={logo} alt="Kargee Logo" className="h-10 md:h-14" />
+            </Link>
             <p className="text-white/80 mb-6 leading-relaxed">
               Crafting timeless ethnic fashion with modern elegance since 2020.
             </p>

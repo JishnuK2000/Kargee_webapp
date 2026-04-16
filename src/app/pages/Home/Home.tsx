@@ -60,15 +60,18 @@ export default function Home() {
       {/* Main components */}
       <Navbar />
       <Hero />
-      <Features />
+
       <BannerSection />
-      <Home4Grid />
+
+
+      <ProductShowcase />
+      <PromoBanner />
       {/* <CollectionGrid /> */}
       <CategoryCards />
-      <PromoBanner />
-      <ProductShowcase />
-      <Reviews />
+      <Home4Grid />
+      {/* <Reviews /> */}
       <InstagramSection />
+      <Features />
       <SupportSection />
       <Footer />
     </div>
