@@ -7,6 +7,49 @@ import favIcon from "../../../assets/icons/wishlist.svg";
 import { useCart } from "../../../context/cartContext";
 import { useToast } from "../../../context/toastContext";
 
+/* ================= ZOOM IMAGE ================= */
+function ZoomImage({ src }: { src: string }) {
+  const [zoomStyle, setZoomStyle] = useState<any>({});
+  const [showZoom, setShowZoom] = useState(false);
+
+  const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top, width, height } =
+      e.currentTarget.getBoundingClientRect();
+
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+
+    setZoomStyle({
+      backgroundImage: `url(${src})`,
+      backgroundPosition: `${x}% ${y}%`,
+      backgroundSize: "200%",
+    });
+  };
+
+  return (
+    <div
+      className="relative w-full overflow-hidden cursor-zoom-in bg-gray-100"
+      style={{ aspectRatio: "3 / 4" }} // ✅ KEY FIX
+      onMouseMove={handleMove}
+      onMouseEnter={() => setShowZoom(true)}
+      onMouseLeave={() => setShowZoom(false)}
+    >
+      <img
+        src={src}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+
+      {showZoom && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={zoomStyle}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ================= MAIN ================= */
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -18,7 +61,6 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const [selectedImage, setSelectedImage] = useState("");
   const [qty, setQty] = useState(1);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
@@ -30,13 +72,12 @@ export default function ProductDetail() {
       try {
         const res = await fetch(`${API}/products/${id}`);
         const data = await res.json();
+
         setProduct(data);
-        setSelectedImage(data.images?.[0] || "");
-        // auto-select first size and color
         setSelectedSize(data.sizes?.[0] || "");
         setSelectedColor(data.colors?.[0] || "");
       } catch (err) {
-        console.error("Error fetching product:", err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -45,31 +86,12 @@ export default function ProductDetail() {
     if (id) fetchProduct();
   }, [id]);
 
-  if (loading) {
-    return (
-      <Layout>
-        <p className="p-6">Loading...</p>
-      </Layout>
-    );
-  }
-
-  if (!product) {
-    return (
-      <Layout>
-        <p className="p-6">Product not found</p>
-      </Layout>
-    );
-  }
+  if (loading) return <Layout><p className="p-6">Loading...</p></Layout>;
+  if (!product) return <Layout><p className="p-6">Product not found</p></Layout>;
 
   const validate = () => {
-    if (!selectedSize) {
-      showToast("Please select a size");
-      return false;
-    }
-    if (!selectedColor) {
-      showToast("Please select a color");
-      return false;
-    }
+    if (!selectedSize) return showToast("Select size");
+    if (!selectedColor) return showToast("Select color");
     return true;
   };
 
@@ -86,7 +108,7 @@ export default function ProductDetail() {
       color: selectedColor,
     });
 
-    showToast("Product added to cart successfully");
+    showToast("Added to cart");
   };
 
   const handleBuyNow = () => {
@@ -109,49 +131,32 @@ export default function ProductDetail() {
 
   return (
     <Layout>
-      <section className="min-h-screen pb-24 md:pb-0 font-[Inter]">
-        <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6 md:py-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+      {/* ✅ Added top padding for navbar */}
+      <section className="pt-24 md:pt-28 min-h-screen">
 
-          {/* IMAGE SECTION */}
-          <div className="space-y-4">
-            <div className="relative w-full overflow-hidden">
-              <img
-                src={selectedImage}
-                className="w-full object-cover transition duration-500"
-              />
-            </div>
+        <div className="max-w-[1300px] mx-auto grid grid-cols-1 md:grid-cols-[1fr_420px]">
 
-            {/* Thumbnails */}
-            <div className="flex gap-3">
-              {product.images?.map((img: string, i: number) => (
-                <img
-                  key={i}
-                  src={img}
-                  className={`w-20 h-20 object-cover border cursor-pointer ${
-                    selectedImage === img
-                      ? "border-[#5E2A14]"
-                      : "border-gray-200"
-                  }`}
-                  onMouseEnter={() => setSelectedImage(img)}
-                />
-              ))}
-            </div>
+          {/* ================= LEFT: IMAGE GRID ================= */}
+          <div className="grid grid-cols-2">
+            {product.images?.map((img: string, i: number) => (
+              <ZoomImage key={i} src={img} />
+            ))}
           </div>
 
-          {/* PRODUCT DETAILS */}
-          <div className="space-y-5">
+          {/* ================= RIGHT: STICKY SIDEBAR ================= */}
+          <div className="sticky top-28 h-fit px-6 space-y-5">
 
             {/* CATEGORY + RATING */}
-            <div className="flex items-center justify-between text-sm text-gray-500">
+            {/* <div className="flex justify-between text-sm text-gray-500">
               <span>{product.category}</span>
               <span className="flex items-center gap-1">
                 <Star size={16} className="text-yellow-500 fill-yellow-400" />
-                4.2 <span className="text-gray-400">(10 reviews)</span>
+                4.2
               </span>
-            </div>
+            </div> */}
 
             {/* NAME */}
-            <h1 className="text-2xl md:text-3xl font-medium font-[Inter]">
+            <h1 className="text-2xl md:text-3xl font-medium">
               {product.name}
             </h1>
 
@@ -160,25 +165,18 @@ export default function ProductDetail() {
 
             {/* COLORS */}
             <div>
-              <h4 className="text-sm font-medium mb-2">
-                Color{" "}
-                {selectedColor && (
-                  <span className="text-gray-400 font-normal capitalize">
-                    — {selectedColor}
-                  </span>
-                )}
+              <h4 className="text-sm mb-2">
+                Color — {selectedColor}
               </h4>
               <div className="flex gap-2">
                 {product.colors?.map((color: string) => (
                   <button
                     key={color}
                     onClick={() => setSelectedColor(color)}
-                    title={color}
-                    className={`w-7 h-7 rounded-full border-2 transition ${
-                      selectedColor === color
-                        ? "border-[#5E2A14] scale-110 shadow-md"
-                        : "border-gray-300"
-                    }`}
+                    className={`w-7 h-7 rounded-full border-2 ${selectedColor === color
+                      ? "border-[#5E2A14] scale-110"
+                      : "border-gray-300"
+                      }`}
                     style={{ backgroundColor: color.toLowerCase() }}
                   />
                 ))}
@@ -187,83 +185,61 @@ export default function ProductDetail() {
 
             {/* SIZES */}
             <div>
-              <h4 className="text-sm font-medium mb-2">
-                Size{" "}
-                {selectedSize && (
-                  <span className="text-gray-400 font-normal">
-                    — {selectedSize}
-                  </span>
-                )}
+              <h4 className="text-sm mb-2">
+                Size — {selectedSize}
               </h4>
               <div className="flex gap-2 flex-wrap">
                 {product.sizes?.map((size: string) => (
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
-                    className={`border px-3 py-1 text-sm transition ${
-                      selectedSize === size
-                        ? "border-[#5E2A14] bg-[#5E2A14] text-white"
-                        : "border-gray-300 hover:border-[#5E2A14]"
-                    }`}
+                    className={`border px-3 py-1 text-sm ${selectedSize === size
+                      ? "bg-[#5E2A14] text-white"
+                      : "border-gray-300"
+                      }`}
                   >
                     {size}
                   </button>
                 ))}
               </div>
-              <button className="mt-2 text-sm underline text-[#5E2A14]">
-                View Size Guide
-              </button>
             </div>
 
             {/* PRICE */}
-            <div className="flex items-center gap-3">
-              <span className="text-2xl md:text-3xl font-semibold text-[#5E2A14]">
+            <div className="flex gap-3 items-center">
+              <span className="text-2xl font-semibold text-[#5E2A14]">
                 ₹{product.discountPrice}
               </span>
-              <span className="line-through text-gray-400 text-sm">
+              <span className="line-through text-gray-400">
                 ₹{product.price}
               </span>
             </div>
 
             {/* ACTIONS */}
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex gap-3 flex-wrap">
 
-              {/* Quantity */}
-              <div className="flex items-center border">
-                <button
-                  onClick={() => setQty(qty > 1 ? qty - 1 : 1)}
-                  className="px-3 py-2 text-lg"
-                >
-                  -
-                </button>
-                <span className="px-4 text-sm">{qty}</span>
-                <button
-                  onClick={() => setQty(qty + 1)}
-                  className="px-3 py-2 text-lg"
-                >
-                  +
-                </button>
+              {/* QTY */}
+              <div className="flex border">
+                <button onClick={() => setQty(qty > 1 ? qty - 1 : 1)} className="px-3">-</button>
+                <span className="px-4">{qty}</span>
+                <button onClick={() => setQty(qty + 1)} className="px-3">+</button>
               </div>
 
-              {/* Buy Now */}
+              {/* BUY */}
               <button
                 onClick={handleBuyNow}
-                className="flex-1 md:min-w-[200px] bg-[#5E2A14] text-white px-6 py-3 text-sm font-medium"
+                className="flex-1 bg-[#5E2A14] text-white px-6 py-3"
               >
                 Buy Now
               </button>
 
-              {/* Add to Cart */}
-              <button
-                onClick={handleAddToCart}
-                className="bg-[#5E2A14] p-3 flex items-center justify-center"
-              >
-                <img src={cartIcon} alt="cart" className="w-5 h-5" />
+              {/* CART */}
+              <button onClick={handleAddToCart} className="bg-[#5E2A14] p-3">
+                <img src={cartIcon} className="w-5 h-5" />
               </button>
 
-              {/* Wishlist */}
-              <button className="bg-[#5E2A14] p-3 flex items-center justify-center">
-                <img src={favIcon} alt="wishlist" className="w-5 h-5" />
+              {/* WISHLIST */}
+              <button className="bg-[#5E2A14] p-3">
+                <img src={favIcon} className="w-5 h-5" />
               </button>
             </div>
 

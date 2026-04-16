@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import OTPLogin from "./OTPLogin";
 
@@ -33,6 +33,8 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === "/";
 
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0 });
@@ -53,7 +55,7 @@ export default function Navbar() {
     { name: "Contact Us" },
   ];
 
-  // ✅ Fetch Collections
+  // Fetch collections
   useEffect(() => {
     const fetchCollections = async () => {
       try {
@@ -67,15 +69,20 @@ export default function Navbar() {
     fetchCollections();
   }, []);
 
-  // ✅ Scroll detection
+  // Scroll detection
   useEffect(() => {
+    if (!isHome) {
+      setIsScrolled(true); // always scrolled style on other pages
+      return;
+    }
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isHome]);
 
   const handleHover = (index: number) => {
     const el = navRefs.current[index];
@@ -94,9 +101,11 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isHome
+        ? isScrolled
           ? "bg-white/90 backdrop-blur-md shadow-md border-b border-gray-100"
           : "bg-transparent"
+        : "bg-white/90 backdrop-blur-md shadow-md border-b border-gray-100"
         }`}
     >
       <div className="max-w-screen-2xl mx-auto px-2 sm:px-4 lg:px-6">
@@ -117,13 +126,12 @@ export default function Navbar() {
                 onMouseEnter={() => handleHover(index)}
                 onMouseLeave={() => setActiveIndex(null)}
               >
-                {/* TEXT */}
                 <motion.span
                   onClick={() => navigate("/products")}
                   whileHover={{ y: -2 }}
-                  className={`text-base md:text-lg cursor-pointer font-medium transition ${isScrolled
-                      ? "text-gray-700 hover:text-[#5E2A14]"
-                      : "text-white hover:text-gray-200"
+                  className={`text-base md:text-lg cursor-pointer font-medium transition ${isHome && !isScrolled
+                    ? "text-white hover:text-gray-200"
+                    : "text-gray-700 hover:text-[#5E2A14]"
                     }`}
                 >
                   {link.name}
@@ -181,7 +189,7 @@ export default function Navbar() {
             <button>
               <img
                 src={searchIcon}
-                className={`w-6 h-6 md:w-7 md:h-7 ${isScrolled ? "" : "invert"
+                className={`w-6 h-6 md:w-7 md:h-7 ${isHome && !isScrolled ? "invert" : ""
                   }`}
               />
             </button>
@@ -189,7 +197,7 @@ export default function Navbar() {
             <button onClick={() => navigate("/cart")} className="relative">
               <img
                 src={cartIcon}
-                className={`w-6 h-6 md:w-7 md:h-7 ${isScrolled ? "" : "invert"
+                className={`w-6 h-6 md:w-7 md:h-7 ${isHome && !isScrolled ? "invert" : ""
                   }`}
               />
 
@@ -208,19 +216,20 @@ export default function Navbar() {
             >
               <img
                 src={userIcon}
-                className={`w-6 h-6 md:w-7 md:h-7 ${isScrolled ? "" : "invert"
+                className={`w-6 h-6 md:w-7 md:h-7 ${isHome && !isScrolled ? "invert" : ""
                   }`}
               />
             </button>
 
-            {/* MOBILE MENU BUTTON */}
+            {/* MOBILE MENU */}
             <button
               className="md:hidden"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               <img
                 src={isMobileMenuOpen ? closeIcon : menuIcon}
-                className={`w-7 h-7 ${isScrolled ? "" : "invert"}`}
+                className={`w-7 h-7 ${isHome && !isScrolled ? "invert" : ""
+                  }`}
               />
             </button>
           </div>

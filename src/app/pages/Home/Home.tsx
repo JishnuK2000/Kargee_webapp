@@ -14,6 +14,7 @@ import LoginModal from "../../components/LoginModal";
 import Home4Grid from "../../components/Home4Grid";
 import { useEffect, useState } from "react";
 import { User } from "../../../types";
+import ModelShowcase from "../../components/ModelShowcase";
 
 export default function Home() {
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -65,6 +66,7 @@ export default function Home() {
 
 
       <ProductShowcase />
+      <ModelShowcase />
       <PromoBanner />
       {/* <CollectionGrid /> */}
       <CategoryCards />
